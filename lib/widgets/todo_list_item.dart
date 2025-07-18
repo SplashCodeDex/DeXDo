@@ -1,4 +1,6 @@
 
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:dexdo/models/todo_model.dart';
 
@@ -10,31 +12,39 @@ class TodoListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.8),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.3),
+              width: 1.5,
+            ),
           ),
-        ],
-      ),
-      child: ListTile(
-        title: Text(
-          todo.title,
-          style: TextStyle(
-            decoration: todo.isDone ? TextDecoration.lineThrough : TextDecoration.none,
+          child: ListTile(
+            title: Text(
+              todo.title,
+              style: TextStyle(
+                color: Colors.white,
+                decoration: todo.isDone ? TextDecoration.lineThrough : TextDecoration.none,
+                decorationColor: Colors.white70,
+              ),
+            ),
+            leading: Checkbox(
+              value: todo.isDone,
+              onChanged: onchanged,
+              checkColor: Colors.deepPurple.shade300,
+              activeColor: Colors.white,
+            ),
           ),
-        ),
-        leading: Checkbox(
-          value: todo.isDone,
-          onChanged: onchanged,
         ),
       ),
     );
   }
 }
+

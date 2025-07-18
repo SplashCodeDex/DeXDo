@@ -58,48 +58,73 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[200],
+      backgroundColor: Colors.deepPurple.shade200,
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const Text('DeXDo'),
         backgroundColor: Colors.transparent,
         elevation: 0,
+        title: const Text(
+          'DeXDo',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 24,
+          ),
+        ),
       ),
-      body: _todos.isEmpty
-          ? const Center(
-              child: Text(
-                'You have no tasks yet. Add one!',
-                style: TextStyle(fontSize: 18, color: Colors.grey),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Colors.deepPurple.shade300,
+              Colors.pink.shade200,
+              Colors.amber.shade200,
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: _todos.isEmpty
+            ? const Center(
+                child: Text(
+                  'You have no tasks yet. Add one!',
+                  style: TextStyle(fontSize: 18, color: Colors.white),
+                ),
+              )
+            : AnimatedList(
+                key: _listKey,
+                initialItemCount: _todos.length,
+                itemBuilder: (context, index, animation) {
+                  final todo = _todos[index];
+                  return FadeTransition(
+                    opacity: animation,
+                    child: Dismissible(
+                      key: Key(todo.id),
+                      onDismissed: (direction) {
+                        _deleteTodo(index);
+                      },
+                      background: Container(
+                        color: Colors.red.withOpacity(0.5),
+                        alignment: Alignment.centerRight,
+                        padding: const EdgeInsets.only(right: 20),
+                        child: const Icon(Icons.delete, color: Colors.white),
+                      ),
+                      child: TodoListItem(
+                        todo: todo,
+                        onchanged: (value) => _toggleTodoStatus(index, value),
+                      ),
+                    ),
+                  );
+                },
               ),
-            )
-          : AnimatedList(
-              key: _listKey,
-              initialItemCount: _todos.length,
-              itemBuilder: (context, index, animation) {
-                final todo = _todos[index];
-                return FadeTransition(
-                  opacity: animation,
-                  child: Dismissible(
-                    key: Key(todo.id),
-                    onDismissed: (direction) {
-                      _deleteTodo(index);
-                    },
-                    background: Container(
-                      color: Colors.red,
-                      alignment: Alignment.centerRight,
-                      padding: const EdgeInsets.only(right: 20),
-                      child: const Icon(Icons.delete, color: Colors.white),
-                    ),
-                    child: TodoListItem(
-                      todo: todo,
-                      onchanged: (value) => _toggleTodoStatus(index, value),
-                    ),
-                  ),
-                );
-              },
-            ),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: _addTask,
-        child: const Icon(Icons.add),
+        backgroundColor: Colors.white,
+        child: Icon(
+          Icons.add,
+          color: Colors.deepPurple.shade300,
+        ),
       ),
     );
   }
