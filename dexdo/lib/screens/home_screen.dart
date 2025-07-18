@@ -1,4 +1,3 @@
-
 import 'package:dexdo/screens/add_task_screen.dart';
 import 'package:dexdo/widgets/todo_list_item.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +11,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
   final List<Todo> _todos = [
     Todo(id: '1', title: 'Buy milk'),
     Todo(id: '2', title: 'Walk the dog'),
@@ -30,19 +30,29 @@ class _HomePageState extends State<HomePage> {
     );
 
     if (result != null && result is String) {
+      final newTodo = Todo(
+        id: DateTime.now().toString(),
+        title: result,
+      );
       setState(() {
-        _todos.add(Todo(
-          id: DateTime.now().toString(),
-          title: result,
-        ));
+        _todos.add(newTodo);
+        _listKey.currentState?.insertItem(_todos.length - 1);
       });
     }
   }
 
   void _deleteTodo(int index) {
-    setState(() {
-      _todos.removeAt(index);
-    });
+    final removedTodo = _todos.removeAt(index);
+    _listKey.currentState?.removeItem(
+      index,
+      (context, animation) => FadeTransition(
+        opacity: animation,
+        child: TodoListItem(
+          todo: removedTodo,
+          onchanged: (value) {},
+        ),
+      ),
+    );
   }
 
   @override
@@ -54,54 +64,43 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
-      body: TodoList(
-        todos: _todos,
-        onTodoChanged: _toggleTodoStatus,
-        onTodoDeleted: _deleteTodo,
-      ),
+      body: _todos.isEmpty
+          ? const Center(
+              child: Text(
+                'You have no tasks yet. Add one!',
+                style: TextStyle(fontSize: 18, color: Colors.grey),
+              ),
+            )
+          : AnimatedList(
+              key: _listKey,
+              initialItemCount: _todos.length,
+              itemBuilder: (context, index, animation) {
+                final todo = _todos[index];
+                return FadeTransition(
+                  opacity: animation,
+                  child: Dismissible(
+                    key: Key(todo.id),
+                    onDismissed: (direction) {
+                      _deleteTodo(index);
+                    },
+                    background: Container(
+                      color: Colors.red,
+                      alignment: Alignment.centerRight,
+                      padding: const EdgeInsets.only(right: 20),
+                      child: const Icon(Icons.delete, color: Colors.white),
+                    ),
+                    child: TodoListItem(
+                      todo: todo,
+                      onchanged: (value) => _toggleTodoStatus(index, value),
+                    ),
+                  ),
+                );
+              },
+            ),
       floatingActionButton: FloatingActionButton(
         onPressed: _addTask,
         child: const Icon(Icons.add),
       ),
-    );
-  }
-}
-
-class TodoList extends StatelessWidget {
-  final List<Todo> todos;
-  final Function(int, bool?) onTodoChanged;
-  final Function(int) onTodoDeleted;
-
-  const TodoList({
-    super.key,
-    required this.todos,
-    required this.onTodoChanged,
-    required this.onTodoDeleted,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: todos.length,
-      itemBuilder: (context, index) {
-        final todo = todos[index];
-        return Dismissible(
-          key: Key(todo.id),
-          onDismissed: (direction) {
-            onTodoDeleted(index);
-          },
-          background: Container(
-            color: Colors.red,
-            alignment: Alignment.centerRight,
-            padding: const EdgeInsets.only(right: 20),
-            child: const Icon(Icons.delete, color: Colors.white),
-          ),
-          child: TodoListItem(
-            todo: todo,
-            onchanged: (value) => onTodoChanged(index, value),
-          ),
-        );
-      },
     );
   }
 }
