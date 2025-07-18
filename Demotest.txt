@@ -1,2 +1,3 @@
 Hey There! I am coding in github right now.
 Now we try new branch lesson and how it goes. I'm very happy to start this lesson.
+Trying out the CLI way of committing to remote repo.
