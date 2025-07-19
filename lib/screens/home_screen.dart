@@ -25,14 +25,18 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _addTask() async {
-    final result = await Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => const AddTaskScreen()),
-    );
+    final result = await Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (context) => const AddTaskScreen()));
 
-    if (result != null && result is String) {
+    if (result != null && result is Map<String, String>) {
       final newTodo = Todo(
         id: DateTime.now().toString(),
-        title: result,
+        title: result['title']!,
+        description:
+            result['description'] != null && result['description']!.isNotEmpty
+            ? result['description']!
+            : '',
       );
       setState(() {
         _todos.add(newTodo);
@@ -47,10 +51,7 @@ class _HomePageState extends State<HomePage> {
       index,
       (context, animation) => FadeTransition(
         opacity: animation,
-        child: TodoListItem(
-          todo: removedTodo,
-          onchanged: (value) {},
-        ),
+        child: TodoListItem(todo: removedTodo, onchanged: (value) {}),
       ),
     );
   }
@@ -124,16 +125,10 @@ class _HomePageState extends State<HomePage> {
                 },
               ),
       ),
-      floatingActionButton: Hero(
-        tag: 'add_task_hero',
-        child: FloatingActionButton(
-          onPressed: _addTask,
-          backgroundColor: Colors.white,
-          child: Icon(
-            Icons.add,
-            color: Colors.deepPurple.shade300,
-          ),
-        ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _addTask,
+        backgroundColor: Colors.white,
+        child: Icon(Icons.add, color: Colors.deepPurple.shade300),
       ),
     );
   }

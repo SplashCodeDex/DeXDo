@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 class AddTaskScreen extends StatefulWidget {
@@ -17,41 +16,43 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
     return Hero(
       tag: 'add_task_hero',
       child: Scaffold(
-      appBar: AppBar(
-        title: const Text('Add New Task'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextField(
-              controller: _titleController,
-              decoration: const InputDecoration(
-                labelText: 'Title',
-                border: OutlineInputBorder(),
+        appBar: AppBar(title: const Text('Add New Task')),
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              TextField(
+                controller: _titleController,
+                decoration: const InputDecoration(
+                  labelText: 'Title',
+                  border: OutlineInputBorder(),
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _descriptionController,
-              decoration: const InputDecoration(
-                labelText: 'Description',
-                border: OutlineInputBorder(),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _descriptionController,
+                decoration: const InputDecoration(
+                  labelText: 'Description',
+                  border: OutlineInputBorder(),
+                ),
+                maxLines: 5,
               ),
-              maxLines: 5,
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                // Add the new task
-                final title = _titleController.text;
-                if (title.isNotEmpty) {
-                  Navigator.of(context).pop(title);
-                }
-              },
-              child: const Text('Add Task'),
-            )
-          ],
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () {
+                  // Add the new task
+                  final title = _titleController.text;
+                  if (title.isNotEmpty) {
+                    Navigator.of(context).pop({
+                      'title': title,
+                      'description': _descriptionController.text,
+                    });
+                  }
+                },
+                child: const Text('Add Task'),
+              ),
+            ],
+          ),
         ),
       ),
     );
