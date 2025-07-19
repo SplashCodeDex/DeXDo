@@ -14,7 +14,9 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Hero(
+      tag: 'add_task_hero',
+      child: Scaffold(
       appBar: AppBar(
         title: const Text('Add New Task'),
       ),

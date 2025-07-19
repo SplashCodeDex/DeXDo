@@ -96,34 +96,43 @@ class _HomePageState extends State<HomePage> {
                 initialItemCount: _todos.length,
                 itemBuilder: (context, index, animation) {
                   final todo = _todos[index];
-                  return FadeTransition(
-                    opacity: animation,
-                    child: Dismissible(
-                      key: Key(todo.id),
-                      onDismissed: (direction) {
-                        _deleteTodo(index);
-                      },
-                      background: Container(
-                        color: Colors.red.withOpacity(0.5),
-                        alignment: Alignment.centerRight,
-                        padding: const EdgeInsets.only(right: 20),
-                        child: const Icon(Icons.delete, color: Colors.white),
-                      ),
-                      child: TodoListItem(
-                        todo: todo,
-                        onchanged: (value) => _toggleTodoStatus(index, value),
+                  return SlideTransition(
+                    position: Tween<Offset>(
+                      begin: const Offset(1, 0),
+                      end: Offset.zero,
+                    ).animate(animation),
+                    child: FadeTransition(
+                      opacity: animation,
+                      child: Dismissible(
+                        key: Key(todo.id),
+                        onDismissed: (direction) {
+                          _deleteTodo(index);
+                        },
+                        background: Container(
+                          color: Colors.red.withOpacity(0.5),
+                          alignment: Alignment.centerRight,
+                          padding: const EdgeInsets.only(right: 20),
+                          child: const Icon(Icons.delete, color: Colors.white),
+                        ),
+                        child: TodoListItem(
+                          todo: todo,
+                          onchanged: (value) => _toggleTodoStatus(index, value),
+                        ),
                       ),
                     ),
                   );
                 },
               ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _addTask,
-        backgroundColor: Colors.white,
-        child: Icon(
-          Icons.add,
-          color: Colors.deepPurple.shade300,
+      floatingActionButton: Hero(
+        tag: 'add_task_hero',
+        child: FloatingActionButton(
+          onPressed: _addTask,
+          backgroundColor: Colors.white,
+          child: Icon(
+            Icons.add,
+            color: Colors.deepPurple.shade300,
+          ),
         ),
       ),
     );
