@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:dexdo/models/todo_model.dart';
+import 'package:flutter_vibrate/flutter_vibrate.dart';
 
 class TodoListItem extends StatefulWidget {
   final Todo todo;
@@ -152,7 +153,10 @@ class _TodoListItemState extends State<TodoListItem>
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: _showEditDialog,
+      onTap: () {
+        Vibrate.feedback(FeedbackType.light);
+        _showEditDialog();
+      },
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
         child: BackdropFilter(

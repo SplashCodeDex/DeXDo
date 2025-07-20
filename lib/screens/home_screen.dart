@@ -1,9 +1,11 @@
 import 'dart:convert';
+import 'dart:ui';
 
 import 'package:dexdo/screens/add_task_screen.dart';
 import 'package:dexdo/widgets/todo_list_item.dart';
 import 'package:flutter/material.dart';
 import 'package:dexdo/models/todo_model.dart';
+import 'package:flutter_vibrate/flutter_vibrate.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
@@ -44,6 +46,7 @@ class _HomePageState extends State<HomePage> {
       _todos[index] = _todos[index].copyWith(isDone: isDone);
     });
     _saveTasks();
+    Vibrate.feedback(FeedbackType.light);
   }
 
   void _updateTodo(int index, Todo todo) {
@@ -79,6 +82,7 @@ class _HomePageState extends State<HomePage> {
       _todos.removeAt(index);
     });
     _saveTasks();
+    Vibrate.feedback(FeedbackType.warning);
   }
 
   void _onReorder(int oldIndex, int newIndex) {
@@ -90,6 +94,7 @@ class _HomePageState extends State<HomePage> {
       _todos.insert(newIndex, todo);
     });
     _saveTasks();
+    Vibrate.feedback(FeedbackType.medium);
   }
 
   @override
@@ -99,6 +104,14 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
+        flexibleSpace: ClipRect(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            child: Container(
+              color: Colors.transparent,
+            ),
+          ),
+        ),
         title: const Text(
           'DeXDo',
           style: TextStyle(
@@ -160,10 +173,21 @@ class _HomePageState extends State<HomePage> {
                         _deleteTodo(index);
                       },
                       background: Container(
-                        color: Colors.red.withOpacity(0.5),
-                        alignment: Alignment.centerRight,
-                        padding: const EdgeInsets.only(right: 20),
-                        child: const Icon(Icons.delete, color: Colors.white),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              Colors.red.withOpacity(0.6),
+                              Colors.red.withOpacity(0.2),
+                            ],
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
+                          ),
+                        ),
+                        alignment: Alignment.center,
+                        child: const Padding(
+                          padding: EdgeInsets.all(16.0),
+                          child: Icon(Icons.delete, color: Colors.white),
+                        ),
                       ),
                       child: TodoListItem(
                         key: ValueKey(_todos[index].id),
