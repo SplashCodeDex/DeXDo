@@ -15,7 +15,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   final _titleFocusNode = FocusNode();
   final _descriptionFocusNode = FocusNode();
 
-  bool _isLoading = false;
+  final bool _isLoading = false;
   String? _errorMessage;
 
   static const int _maxTitleLength = 100;
