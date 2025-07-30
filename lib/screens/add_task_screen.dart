@@ -15,7 +15,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   final _titleFocusNode = FocusNode();
   final _descriptionFocusNode = FocusNode();
 
-  final bool _isLoading = false;
+  bool _isLoading = false;
   String? _errorMessage;
 
   static const int _maxTitleLength = 100;
@@ -59,7 +59,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
     }
 
     // Check for potentially problematic characters
-    if (sanitized.contains(RegExp(r'[<>"\'\\]'))) {
+    if (sanitized.contains(RegExp(r'[<>"\\]'))) {
       return 'Title contains invalid characters';
     }
 
