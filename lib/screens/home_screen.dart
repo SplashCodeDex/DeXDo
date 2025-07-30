@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:dexdo/screens/add_task_screen.dart';
@@ -218,7 +219,9 @@ class _HomePageState extends State<HomePage> {
 
   void _provideFeedback(FeedbackType type) {
     try {
+      if (Platform.isIOS || Platform.isAndroid) {
       Vibrate.feedback(type);
+    }
     } catch (e) {
       // Vibration might not be available on all devices
       debugPrint('Vibration not available: $e');
@@ -329,155 +332,85 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        flexibleSpace: ClipRect(
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-            child: Container(color: Colors.transparent),
-          ),
-        ),
-        title: const Text(
+        title: Text(
           'DeXDo',
-          style: TextStyle(
-            color: Color(0xFF4B4B4B),
-            fontWeight: FontWeight.bold,
-            fontSize: 24,
-          ),
+          style: Theme.of(context).appBarTheme.titleTextStyle,
         ),
+        centerTitle: false,
+        actions: [
+          IconButton(
+            icon: Icon(
+              Icons.sort,
+              color: Theme.of(context).appBarTheme.iconTheme?.color,
+            ),
+            onPressed: () {
+              // TODO: Implement sorting
+            },
+          ),
+        ],
       ),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              const Color(0xFFF5F5DC).withOpacity(0.8),
-              const Color(0xFFF5F5DC).withOpacity(0.9),
-              const Color(0xFFF5F5DC),
+              Theme.of(context).colorScheme.primary.withOpacity(0.1),
+              Theme.of(context).colorScheme.tertiary.withOpacity(0.1),
             ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
         ),
-        child: _isLoading
-            ? _buildLoadingState()
-            : _errorMessage != null
-            ? _buildErrorState()
-            : _todos.isEmpty
-            ? _buildEmptyState()
-            : ReorderableListView(
-                onReorder: _onReorder,
-                padding: const EdgeInsets.only(top: 100, bottom: 80),
-                children: <Widget>[
-                  for (int index = 0; index < _todos.length; index++)
-                    Dismissible(
-                      key: Key(_todos[index].id),
-                      onDismissed: (direction) {
-                        _deleteTodo(index);
-                      },
-                      confirmDismiss: (direction) async {
-                        return await showDialog<bool>(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            backgroundColor: const Color(0xFFF5F5DC),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            title: const Text(
-                              'Delete Task',
-                              style: TextStyle(
-                                color: Color(0xFF4B4B4B),
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            content: Text(
-                              'Are you sure you want to delete "${_todos[index].displayTitle}"?',
-                              style: const TextStyle(color: Color(0xFF4B4B4B)),
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () =>
-                                    Navigator.of(context).pop(false),
-                                child: const Text(
-                                  'Cancel',
-                                  style: TextStyle(color: Color(0xFF4B4B4B)),
-                                ),
-                              ),
-                              ElevatedButton(
-                                onPressed: () =>
-                                    Navigator.of(context).pop(true),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.red.shade400,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(
+            color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.7),
+            child: SafeArea(
+              child: _isLoading
+                  ? _buildLoadingState()
+                  : _errorMessage != null
+                      ? _buildErrorState()
+                      : _todos.isEmpty
+                          ? _buildEmptyState()
+                          : ReorderableListView(
+                              onReorder: _onReorder,
+                              padding: const EdgeInsets.only(top: 100, bottom: 80),
+                              children: <Widget>[
+                                for (int index = 0; index < _todos.length; index++)
+                                  Dismissible(
+                                    key: Key(_todos[index].id),
+                                    onDismissed: (direction) {
+                                      _deleteTodo(index);
+                                    },
+                                    background: Container(
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(context).colorScheme.error,
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                      alignment: Alignment.centerRight,
+                                      padding: const EdgeInsets.only(right: 20),
+                                      child: const Icon(
+                                        Icons.delete,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    child: TodoListItem(
+                                      key: ValueKey(_todos[index].id),
+                                      todo: _todos[index],
+                                      onchanged: (value) =>
+                                          _toggleTodoStatus(index, value),
+                                      onUpdate: (updatedTodo) =>
+                                          _updateTodo(index, updatedTodo),
+                                    ),
                                   ),
-                                ),
-                                child: const Text(
-                                  'Delete',
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                      background: Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              Colors.red.withOpacity(0.6),
-                              Colors.red.withOpacity(0.2),
-                            ],
-                            begin: Alignment.centerLeft,
-                            end: Alignment.centerRight,
-                          ),
-                        ),
-                        alignment: Alignment.center,
-                        child: const Padding(
-                          padding: EdgeInsets.all(16.0),
-                          child: Icon(
-                            Icons.delete,
-                            color: Colors.white,
-                            size: 32,
-                          ),
-                        ),
-                      ),
-                      child: TodoListItem(
-                        key: ValueKey(_todos[index].id),
-                        todo: _todos[index],
-                        onchanged: (value) => _toggleTodoStatus(index, value),
-                        onUpdate: (updatedTodo) =>
-                            _updateTodo(index, updatedTodo),
-                      ),
-                    ),
-                ],
-              ),
-      ),
-      floatingActionButton: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Colors.purple.shade300.withOpacity(0.7),
-              Colors.blue.shade300.withOpacity(0.7),
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.2),
-              spreadRadius: 2,
-              blurRadius: 4,
-              offset: const Offset(0, 2),
+                              ],
+                            ),
             ),
-          ],
+          ),
         ),
-        child: FloatingActionButton(
-          onPressed: _addTask,
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          child: const Icon(Icons.add, color: Colors.white),
-        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _addTask,
+        child: const Icon(Icons.add),
       ),
     );
   }

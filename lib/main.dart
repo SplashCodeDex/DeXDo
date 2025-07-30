@@ -1,4 +1,5 @@
 
+import 'package:dexdo/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:dexdo/screens/home_screen.dart';
@@ -36,25 +37,9 @@ class DeXDo extends StatelessWidget {
       child: MaterialApp(
         title: 'DeXDo',
         debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-          visualDensity: VisualDensity.adaptivePlatformDensity,
-          fontFamily: 'System',
-          useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: Colors.purple.shade300,
-            brightness: Brightness.light,
-          ),
-          appBarTheme: const AppBarTheme(
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            systemOverlayStyle: SystemUiOverlayStyle.dark,
-          ),
-          floatingActionButtonTheme: FloatingActionButtonThemeData(
-            backgroundColor: Colors.purple.shade300,
-            foregroundColor: Colors.white,
-          ),
-        ),
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
+        themeMode: ThemeMode.system,
         home: const HomePage(),
         builder: (context, child) {
           // Additional error boundary at the navigator level

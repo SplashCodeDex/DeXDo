@@ -14,10 +14,8 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   final _descriptionController = TextEditingController();
   final _titleFocusNode = FocusNode();
   final _descriptionFocusNode = FocusNode();
-
   bool _isLoading = false;
   String? _errorMessage;
-
   static const int _maxTitleLength = 100;
   static const int _maxDescriptionLength = 500;
 
@@ -48,32 +46,26 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
     if (value == null || value.trim().isEmpty) {
       return 'Title is required';
     }
-
     final sanitized = _sanitizeInput(value);
     if (sanitized.isEmpty) {
       return 'Title cannot be empty or contain only whitespace';
     }
-
     if (sanitized.length > _maxTitleLength) {
       return 'Title must be $_maxTitleLength characters or less';
     }
-
     // Check for potentially problematic characters
     if (sanitized.contains(RegExp(r'[<>"\\]'))) {
       return 'Title contains invalid characters';
     }
-
     return null;
   }
 
   String? _validateDescription(String? value) {
     if (value == null) return null;
-
     final sanitized = _sanitizeInput(value);
     if (sanitized.length > _maxDescriptionLength) {
       return 'Description must be $_maxDescriptionLength characters or less';
     }
-
     return null;
   }
 
@@ -81,22 +73,17 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
     setState(() {
       _errorMessage = null;
     });
-
     if (!_formKey.currentState!.validate()) {
       return;
     }
-
     setState(() {
       _isLoading = true;
     });
-
     try {
       final sanitizedTitle = _sanitizeInput(_titleController.text);
       final sanitizedDescription = _sanitizeInput(_descriptionController.text);
-
       // Simulate a brief delay for better UX
       await Future.delayed(const Duration(milliseconds: 200));
-
       if (mounted) {
         Navigator.of(context).pop({
           'title': sanitizedTitle,
@@ -115,174 +102,154 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Hero(
       tag: 'add_task_hero',
       child: Scaffold(
-        backgroundColor: const Color(0xFFF5F5DC),
         appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          iconTheme: const IconThemeData(color: Color(0xFF4B4B4B)),
-          title: const Text(
+          title: Text(
             'Add New Task',
-            style: TextStyle(
-              color: Color(0xFF4B4B4B),
-              fontWeight: FontWeight.bold,
-            ),
+            style: theme.appBarTheme.titleTextStyle,
           ),
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
+            icon: Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: theme.appBarTheme.iconTheme?.color,
+            ),
             onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
             tooltip: 'Go back',
           ),
         ),
-        body: Form(
-          key: _formKey,
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (_errorMessage != null)
-                  Container(
-                    margin: const EdgeInsets.only(bottom: 16),
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.red.shade50,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.red.shade200),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(Icons.error_outline, color: Colors.red.shade600, size: 20),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            _errorMessage!,
-                            style: TextStyle(color: Colors.red.shade600),
-                          ),
+        body: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                theme.colorScheme.primary.withOpacity(0.1),
+                theme.colorScheme.tertiary.withOpacity(0.1),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+          child: SafeArea(
+            child: Form(
+              key: _formKey,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (_errorMessage != null)
+                      Container(
+                        margin: const EdgeInsets.only(bottom: 16),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.error.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: theme.colorScheme.error),
                         ),
-                      ],
-                    ),
-                  ),
-
-                TextFormField(
-                  controller: _titleController,
-                  focusNode: _titleFocusNode,
-                  validator: _validateTitle,
-                  maxLength: _maxTitleLength,
-                  textCapitalization: TextCapitalization.sentences,
-                  textInputAction: TextInputAction.next,
-                  onFieldSubmitted: (_) => _descriptionFocusNode.requestFocus(),
-                  decoration: InputDecoration(
-                    labelText: 'Title *',
-                    hintText: 'Enter task title',
-                    labelStyle: const TextStyle(color: Color(0xFF4B4B4B)),
-                    filled: true,
-                    fillColor: Colors.white.withOpacity(0.7),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                    errorBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Colors.red, width: 1),
-                    ),
-                    focusedErrorBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Colors.red, width: 2),
-                    ),
-                    counterText: '',
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                TextFormField(
-                  controller: _descriptionController,
-                  focusNode: _descriptionFocusNode,
-                  validator: _validateDescription,
-                  maxLength: _maxDescriptionLength,
-                  maxLines: 5,
-                  textCapitalization: TextCapitalization.sentences,
-                  textInputAction: TextInputAction.done,
-                  onFieldSubmitted: (_) => _submitTask(),
-                  decoration: InputDecoration(
-                    labelText: 'Description (Optional)',
-                    hintText: 'Enter task description',
-                    labelStyle: const TextStyle(color: Color(0xFF4B4B4B)),
-                    filled: true,
-                    fillColor: Colors.white.withOpacity(0.7),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                    errorBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Colors.red, width: 1),
-                    ),
-                    focusedErrorBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Colors.red, width: 2),
-                    ),
-                    counterText: '',
-                  ),
-                ),
-
-                const SizedBox(height: 32),
-
-                Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        Colors.purple.shade300.withOpacity(0.8),
-                        Colors.blue.shade300.withOpacity(0.8),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: ElevatedButton(
-                    onPressed: _isLoading ? null : _submitTask,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.transparent,
-                      disabledBackgroundColor: Colors.grey.withOpacity(0.3),
-                      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        child: Row(
+                          children: [
+                            Icon(Icons.error_outline, color: theme.colorScheme.error, size: 20),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                _errorMessage!,
+                                style: TextStyle(color: theme.colorScheme.error),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    TextFormField(
+                      controller: _titleController,
+                      focusNode: _titleFocusNode,
+                      validator: _validateTitle,
+                      maxLength: _maxTitleLength,
+                      textCapitalization: TextCapitalization.sentences,
+                      textInputAction: TextInputAction.next,
+                      onFieldSubmitted: (_) => _descriptionFocusNode.requestFocus(),
+                      decoration: InputDecoration(
+                        labelText: 'Title *',
+                        hintText: 'Enter task title',
+                        labelStyle: theme.textTheme.bodyLarge,
+                        filled: true,
+                        fillColor: theme.inputDecorationTheme.fillColor,
+                        border: theme.inputDecorationTheme.border,
+                        enabledBorder: theme.inputDecorationTheme.border,
+                        focusedBorder: theme.inputDecorationTheme.border,
+                        errorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: theme.colorScheme.error, width: 1),
+                        ),
+                        focusedErrorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: theme.colorScheme.error, width: 2),
+                        ),
+                        counterText: '',
                       ),
                     ),
-                    child: _isLoading
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _descriptionController,
+                      focusNode: _descriptionFocusNode,
+                      validator: _validateDescription,
+                      maxLength: _maxDescriptionLength,
+                      maxLines: 5,
+                      textCapitalization: TextCapitalization.sentences,
+                      textInputAction: TextInputAction.done,
+                      onFieldSubmitted: (_) => _submitTask(),
+                      decoration: InputDecoration(
+                        labelText: 'Description (Optional)',
+                        hintText: 'Enter task description',
+                        labelStyle: theme.textTheme.bodyLarge,
+                        filled: true,
+                        fillColor: theme.inputDecorationTheme.fillColor,
+                        border: theme.inputDecorationTheme.border,
+                        enabledBorder: theme.inputDecorationTheme.border,
+                        focusedBorder: theme.inputDecorationTheme.border,
+                        errorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: theme.colorScheme.error, width: 1),
+                        ),
+                        focusedErrorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: theme.colorScheme.error, width: 2),
+                        ),
+                        counterText: '',
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+                    ElevatedButton(
+                      onPressed: _isLoading ? null : _submitTask,
+                      style: theme.elevatedButtonTheme.style,
+                      child: _isLoading
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
+                            )
+                          : const Text(
+                              'Add Task',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
                             ),
-                          )
-                        : const Text(
-                            'Add Task',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                          ),
-                  ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      '* Required field',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.textTheme.bodySmall?.color?.withOpacity(0.6),
+                      ),
+                    ),
+                  ],
                 ),
-
-                const SizedBox(height: 16),
-
-                Text(
-                  '* Required field',
-                  style: TextStyle(
-                    color: const Color(0xFF4B4B4B).withOpacity(0.6),
-                    fontSize: 12,
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
         ),
