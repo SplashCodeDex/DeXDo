@@ -377,31 +377,49 @@ class _HomePageState extends State<HomePage> {
                               children: <Widget>[
                                 for (int index = 0; index < _todos.length; index++)
                                   Dismissible(
-                                    key: Key(_todos[index].id),
-                                    onDismissed: (direction) {
+                                  key: Key(_todos[index].id),
+                                  direction: DismissDirection.horizontal,
+                                  onDismissed: (direction) {
+                                    // Add a slight delay to allow the animation to complete
+                                    Future.delayed(const Duration(milliseconds: 300), () {
                                       _deleteTodo(index);
-                                    },
-                                    background: Container(
-                                      decoration: BoxDecoration(
-                                        color: Theme.of(context).colorScheme.error,
-                                        borderRadius: BorderRadius.circular(16),
-                                      ),
-                                      alignment: Alignment.centerRight,
-                                      padding: const EdgeInsets.only(right: 20),
-                                      child: const Icon(
-                                        Icons.delete,
-                                        color: Colors.white,
-                                      ),
+                                    });
+                                  },
+                                  background: Container(
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(context).colorScheme.error,
+                                      borderRadius: BorderRadius.circular(16),
                                     ),
-                                    child: TodoListItem(
-                                      key: ValueKey(_todos[index].id),
-                                      todo: _todos[index],
-                                      onchanged: (value) =>
-                                          _toggleTodoStatus(index, value),
-                                      onUpdate: (updatedTodo) =>
-                                          _updateTodo(index, updatedTodo),
+                                    alignment: Alignment.centerLeft,
+                                    padding: const EdgeInsets.only(left: 20),
+                                    child: const Icon(
+                                      Icons.delete_forever_rounded,
+                                      color: Colors.white,
+                                      size: 30,
                                     ),
                                   ),
+                                  secondaryBackground: Container(
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(context).colorScheme.primary,
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    alignment: Alignment.centerRight,
+                                    padding: const EdgeInsets.only(right: 20),
+                                    child: const Icon(
+                                      Icons.check_circle_outline_rounded,
+                                      color: Colors.white,
+                                      size: 30,
+                                    ),
+                                  ),
+                                  child: TodoListItem(
+                                    key: ValueKey(_todos[index].id),
+                                    todo: _todos[index],
+                                    onchanged: (value) =>
+                                        _toggleTodoStatus(index, value),
+                                    onUpdate: (updatedTodo) =>
+                                        _updateTodo(index, updatedTodo),
+                                  ),
+                                ),
                               ],
                             ),
             ),

@@ -32,12 +32,13 @@ class _TodoListItemState extends State<TodoListItem>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 400),
     );
 
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    _scaleAnimation = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween<double>(begin: 1.0, end: 0.9), weight: 0.5),
+      TweenSequenceItem(tween: Tween<double>(begin: 0.9, end: 1.0), weight: 0.5),
+    ]).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
 
     // Set initial animation state based on todo status
     if (widget.todo.isDone) {
