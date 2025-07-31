@@ -120,7 +120,48 @@ class _HomePageState extends State<HomePage> {
   Future<void> _addTask() async {
     try {
       final result = await Navigator.of(context).push<Map<String, String>>(
-        MaterialPageRoute(builder: (context) => const AddTaskScreen()),
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) =>
+              const AddTaskScreen(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            const curve = Curves.elasticOut; // For overshoot effect
+            const secondaryCurve = Curves.easeOutCubic; // For smooth outgoing
+
+            final scaleAnimation = Tween<double>(begin: 0.7, end: 1.0).animate(
+              CurvedAnimation(parent: animation, curve: curve),
+            );
+
+            final fadeAnimation = Tween<double>(begin: 0.3, end: 1.0).animate(
+              CurvedAnimation(
+                parent: animation,
+                curve: const Interval(0.0, 0.375, curve: Curves.easeOutCubic), // 0.15s out of 0.4s
+              ),
+            );
+
+            final secondaryScaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
+              CurvedAnimation(parent: secondaryAnimation, curve: secondaryCurve),
+            );
+
+            final secondaryFadeAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
+              CurvedAnimation(parent: secondaryAnimation, curve: secondaryCurve),
+            );
+
+            return FadeTransition(
+              opacity: secondaryFadeAnimation,
+              child: ScaleTransition(
+                scale: secondaryScaleAnimation,
+                child: FadeTransition(
+                  opacity: fadeAnimation,
+                  child: ScaleTransition(
+                    scale: scaleAnimation,
+                    child: child,
+                  ),
+                ),
+              ),
+            );
+          },
+          transitionDuration: const Duration(milliseconds: 400),
+        ),
       );
 
       if (result != null && result['title'] != null) {
@@ -162,8 +203,6 @@ class _HomePageState extends State<HomePage> {
           _todos.insert(index, todoToDelete);
         });
         _showErrorSnackBar('Failed to delete task');
-      } else {
-        _provideFeedback(FeedbackType.warning);
       }
     } catch (e) {
       // Revert on error
@@ -205,8 +244,6 @@ class _HomePageState extends State<HomePage> {
           _todos = originalTodos;
         });
         _showErrorSnackBar('Failed to reorder tasks');
-      } else {
-        _provideFeedback(FeedbackType.medium);
       }
     } catch (e) {
       // Revert on error
@@ -311,8 +348,7 @@ class _HomePageState extends State<HomePage> {
             style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF4B4B4B),
-            ),
+              color: Color(0xFF4B4B4B)),
           ),
           const SizedBox(height: 8),
           Text(

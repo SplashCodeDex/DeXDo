@@ -103,152 +103,153 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Hero(
-      tag: 'add_task_hero',
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(
-            'Add New Task',
-            style: theme.appBarTheme.titleTextStyle,
-          ),
-          leading: IconButton(
-            icon: Icon(
-              Icons.arrow_back_ios_new_rounded,
-              color: theme.appBarTheme.iconTheme?.color,
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(kToolbarHeight), // Standard AppBar height
+          child: AppBar(
+            title: Text(
+              'Add New Task',
+              style: theme.appBarTheme.titleTextStyle,
             ),
-            onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
-            tooltip: 'Go back',
+            leading: IconButton(
+              icon: Icon(
+                Icons.arrow_back_ios_new_rounded,
+                color: theme.appBarTheme.iconTheme?.color,
+              ),
+              onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
+              tooltip: 'Go back',
+            ),
           ),
         ),
-        body: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                theme.colorScheme.primary.withOpacity(0.1),
-                theme.colorScheme.tertiary.withOpacity(0.1),
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              theme.colorScheme.primary.withOpacity(0.1),
+              theme.colorScheme.tertiary.withOpacity(0.1),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
-          child: SafeArea(
-            child: Form(
-              key: _formKey,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    if (_errorMessage != null)
-                      Container(
-                        margin: const EdgeInsets.only(bottom: 16),
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.error.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: theme.colorScheme.error),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(Icons.error_outline, color: theme.colorScheme.error, size: 20),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                _errorMessage!,
-                                style: TextStyle(color: theme.colorScheme.error),
-                              ),
+        ),
+        child: SafeArea(
+          child: Form(
+            key: _formKey,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (_errorMessage != null)
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 16),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.error.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: theme.colorScheme.error),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.error_outline, color: theme.colorScheme.error, size: 20),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              _errorMessage!,
+                              style: TextStyle(color: theme.colorScheme.error),
                             ),
-                          ],
-                        ),
-                      ),
-                    TextFormField(
-                      controller: _titleController,
-                      focusNode: _titleFocusNode,
-                      validator: _validateTitle,
-                      maxLength: _maxTitleLength,
-                      textCapitalization: TextCapitalization.sentences,
-                      textInputAction: TextInputAction.next,
-                      onFieldSubmitted: (_) => _descriptionFocusNode.requestFocus(),
-                      decoration: InputDecoration(
-                        labelText: 'Title *',
-                        hintText: 'Enter task title',
-                        labelStyle: theme.textTheme.bodyLarge,
-                        filled: true,
-                        fillColor: theme.inputDecorationTheme.fillColor,
-                        border: theme.inputDecorationTheme.border,
-                        enabledBorder: theme.inputDecorationTheme.border,
-                        focusedBorder: theme.inputDecorationTheme.border,
-                        errorBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: theme.colorScheme.error, width: 1),
-                        ),
-                        focusedErrorBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: theme.colorScheme.error, width: 2),
-                        ),
-                        counterText: '',
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _descriptionController,
-                      focusNode: _descriptionFocusNode,
-                      validator: _validateDescription,
-                      maxLength: _maxDescriptionLength,
-                      maxLines: 5,
-                      textCapitalization: TextCapitalization.sentences,
-                      textInputAction: TextInputAction.done,
-                      onFieldSubmitted: (_) => _submitTask(),
-                      decoration: InputDecoration(
-                        labelText: 'Description (Optional)',
-                        hintText: 'Enter task description',
-                        labelStyle: theme.textTheme.bodyLarge,
-                        filled: true,
-                        fillColor: theme.inputDecorationTheme.fillColor,
-                        border: theme.inputDecorationTheme.border,
-                        enabledBorder: theme.inputDecorationTheme.border,
-                        focusedBorder: theme.inputDecorationTheme.border,
-                        errorBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: theme.colorScheme.error, width: 1),
-                        ),
-                        focusedErrorBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: theme.colorScheme.error, width: 2),
-                        ),
-                        counterText: '',
+                  TextFormField(
+                    controller: _titleController,
+                    focusNode: _titleFocusNode,
+                    validator: _validateTitle,
+                    maxLength: _maxTitleLength,
+                    textCapitalization: TextCapitalization.sentences,
+                    textInputAction: TextInputAction.next,
+                    onFieldSubmitted: (_) => _descriptionFocusNode.requestFocus(),
+                    decoration: InputDecoration(
+                      labelText: 'Title *',
+                      hintText: 'Enter task title',
+                      labelStyle: theme.textTheme.bodyLarge,
+                      filled: true,
+                      fillColor: theme.inputDecorationTheme.fillColor,
+                      border: theme.inputDecorationTheme.border,
+                      enabledBorder: theme.inputDecorationTheme.border,
+                      focusedBorder: theme.inputDecorationTheme.border,
+                      errorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: theme.colorScheme.error, width: 1),
                       ),
+                      focusedErrorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: theme.colorScheme.error, width: 2),
+                      ),
+                      counterText: '',
                     ),
-                    const SizedBox(height: 32),
-                    ElevatedButton(
-                      onPressed: _isLoading ? null : _submitTask,
-                      style: theme.elevatedButtonTheme.style,
-                      child: _isLoading
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                              ),
-                            )
-                          : const Text(
-                              'Add Task',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _descriptionController,
+                    focusNode: _descriptionFocusNode,
+                    validator: _validateDescription,
+                    maxLength: _maxDescriptionLength,
+                    maxLines: 5,
+                    textCapitalization: TextCapitalization.sentences,
+                    textInputAction: TextInputAction.done,
+                    onFieldSubmitted: (_) => _submitTask(),
+                    decoration: InputDecoration(
+                      labelText: 'Description (Optional)',
+                      hintText: 'Enter task description',
+                      labelStyle: theme.textTheme.bodyLarge,
+                      filled: true,
+                      fillColor: theme.inputDecorationTheme.fillColor,
+                      border: theme.inputDecorationTheme.border,
+                      enabledBorder: theme.inputDecorationTheme.border,
+                      focusedBorder: theme.inputDecorationTheme.border,
+                      errorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: theme.colorScheme.error, width: 1),
+                      ),
+                      focusedErrorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: theme.colorScheme.error, width: 2),
+                      ),
+                      counterText: '',
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  ElevatedButton(
+                    onPressed: _isLoading ? null : _submitTask,
+                    style: theme.elevatedButtonTheme.style,
+                    child: _isLoading
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                             ),
+                          )
+                        : const Text(
+                            'Add Task',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    '* Required field',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.textTheme.bodySmall?.color?.withOpacity(0.6),
                     ),
-                    const SizedBox(height: 16),
-                    Text(
-                      '* Required field',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.textTheme.bodySmall?.color?.withOpacity(0.6),
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
