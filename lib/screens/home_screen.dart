@@ -6,7 +6,16 @@ import 'package:dexdo/widgets/todo_list_item.dart';
 import 'package:flutter/material.dart';
 import 'package:dexdo/models/todo_model.dart';
 import 'package:dexdo/repositories/todo_repository.dart';
-import 'package:flutter_vibrate/flutter_vibrate.dart';
+import 'package:vibration/vibration.dart';
+
+enum FeedbackType {
+  light,
+  medium,
+  heavy,
+  success,
+  warning,
+  error,
+}
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -55,8 +64,8 @@ class _HomePageState extends State<HomePage> {
   Future<void> _toggleTodoStatus(int index, bool? isDone) async {
     if (index < 0 || index >= _todos.length) return;
 
-    final originalTodo = _todos[index];
-    final updatedTodo = originalTodo.copyWith(isDone: isDone);
+    final todoToUpdate = _todos[index];
+    final updatedTodo = todoToUpdate.copyWith(isDone: isDone);
 
     // Optimistic update
     setState(() {
@@ -65,13 +74,13 @@ class _HomePageState extends State<HomePage> {
 
     try {
       final success = await _repository.updateTodo(
-        originalTodo.id,
+        todoToUpdate.id,
         updatedTodo,
       );
       if (!success) {
         // Revert on failure
         setState(() {
-          _todos[index] = originalTodo;
+          _todos[index] = todoToUpdate;
         });
         _showErrorSnackBar('Failed to update task');
       } else {
@@ -80,7 +89,7 @@ class _HomePageState extends State<HomePage> {
     } catch (e) {
       // Revert on error
       setState(() {
-        _todos[index] = originalTodo;
+        _todos[index] = todoToUpdate;
       });
       _showErrorSnackBar('Failed to update task');
     }
@@ -89,7 +98,7 @@ class _HomePageState extends State<HomePage> {
   Future<void> _updateTodo(int index, Todo updatedTodo) async {
     if (index < 0 || index >= _todos.length) return;
 
-    final originalTodo = _todos[index];
+    final todoToUpdate = _todos[index];
 
     // Optimistic update
     setState(() {
@@ -98,20 +107,20 @@ class _HomePageState extends State<HomePage> {
 
     try {
       final success = await _repository.updateTodo(
-        originalTodo.id,
+        todoToUpdate.id,
         updatedTodo,
       );
       if (!success) {
         // Revert on failure
         setState(() {
-          _todos[index] = originalTodo;
+          _todos[index] = todoToUpdate;
         });
         _showErrorSnackBar('Failed to update task');
       }
     } catch (e) {
       // Revert on error
       setState(() {
-        _todos[index] = originalTodo;
+        _todos[index] = todoToUpdate;
       });
       _showErrorSnackBar('Failed to update task');
     }
@@ -257,7 +266,30 @@ class _HomePageState extends State<HomePage> {
   void _provideFeedback(FeedbackType type) {
     try {
       if (Platform.isIOS || Platform.isAndroid) {
-      Vibrate.feedback(type);
+      Vibration.hasVibrator().then((hasVibrator) {
+        if (hasVibrator == true) {
+          switch (type) {
+            case FeedbackType.light:
+              Vibration.vibrate(duration: 10);
+              break;
+            case FeedbackType.medium:
+              Vibration.vibrate(duration: 50);
+              break;
+            case FeedbackType.heavy:
+              Vibration.vibrate(duration: 100);
+              break;
+            case FeedbackType.success:
+              Vibration.vibrate(pattern: [0, 20, 50, 20]);
+              break;
+            case FeedbackType.warning:
+              Vibration.vibrate(pattern: [0, 20, 50, 20, 50, 20]);
+              break;
+            case FeedbackType.error:
+              Vibration.vibrate(pattern: [0, 20, 50, 20, 50, 20, 50, 20]);
+              break;
+          }
+        }
+      });
     }
     } catch (e) {
       // Vibration might not be available on all devices

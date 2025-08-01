@@ -3,7 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:dexdo/models/todo_model.dart';
-import 'package:flutter_vibrate/flutter_vibrate.dart';
+import 'package:vibration/vibration.dart'; // Using the new vibration package
 
 class TodoListItem extends StatefulWidget {
   final Todo todo;
@@ -76,7 +76,7 @@ class _TodoListItemState extends State<TodoListItem>
   void _provideFeedback() {
     try {
       if (Platform.isIOS || Platform.isAndroid) {
-        Vibrate.feedback(FeedbackType.light);
+        Vibration.vibrate(duration: 10); // Using Vibration.vibrate directly
       }
     } catch (e) {
       debugPrint('Vibration not available: $e');

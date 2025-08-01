@@ -29,7 +29,7 @@ class TodoRepository {
           .toList();
     } catch (e) {
       // Log error in production, you might want to use a logging service
-      print('Error loading todos: $e');
+      // print('Error loading todos: $e');
       return [];
     }
   }
@@ -42,7 +42,7 @@ class TodoRepository {
       );
       return await prefs.setString(_todosKey, todosString);
     } catch (e) {
-      print('Error saving todos: $e');
+      // print('Error saving todos: $e');
       return false;
     }
   }
@@ -53,7 +53,7 @@ class TodoRepository {
       todos.add(todo);
       return await saveTodos(todos);
     } catch (e) {
-      print('Error adding todo: $e');
+      // print('Error adding todo: $e');
       return false;
     }
   }
@@ -70,7 +70,7 @@ class TodoRepository {
       todos[index] = updatedTodo;
       return await saveTodos(todos);
     } catch (e) {
-      print('Error updating todo: $e');
+      // print('Error updating todo: $e');
       return false;
     }
   }
@@ -81,7 +81,7 @@ class TodoRepository {
       todos.removeWhere((todo) => todo.id == id);
       return await saveTodos(todos);
     } catch (e) {
-      print('Error deleting todo: $e');
+      // print('Error deleting todo: $e');
       return false;
     }
   }
@@ -108,7 +108,7 @@ class TodoRepository {
 
       return await saveTodos(todos);
     } catch (e) {
-      print('Error reordering todos: $e');
+      // print('Error reordering todos: $e');
       return false;
     }
   }
@@ -118,7 +118,7 @@ class TodoRepository {
       final prefs = await SharedPreferences.getInstance();
       return await prefs.remove(_todosKey);
     } catch (e) {
-      print('Error clearing todos: $e');
+      // print('Error clearing todos: $e');
       return false;
     }
   }
@@ -128,7 +128,7 @@ class TodoRepository {
       final todos = await loadTodos();
       return todos.length;
     } catch (e) {
-      print('Error getting todo count: $e');
+      // print('Error getting todo count: $e');
       return 0;
     }
   }
@@ -138,7 +138,7 @@ class TodoRepository {
       final todos = await loadTodos();
       return todos.where((todo) => todo.isDone).length;
     } catch (e) {
-      print('Error getting completed todo count: $e');
+      // print('Error getting completed todo count: $e');
       return 0;
     }
   }
