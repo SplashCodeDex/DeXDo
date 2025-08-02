@@ -1,7 +1,5 @@
 import 'dart:io';
-import 'dart:ui';
-
-import 'package:dexdo/main.dart';
+import 'package:dexdo/screens/edit_task_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:dexdo/models/todo_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -82,112 +80,12 @@ class _TodoListItemState extends ConsumerState<TodoListItem>
     }
   }
 
-  String _sanitizeInput(String input) {
-    return input.trim().replaceAll(RegExp(r'\s+'), ' ');
-  }
-
-  String? _validateTitle(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return 'Title is required';
-    }
-    final sanitized = _sanitizeInput(value);
-    if (sanitized.isEmpty) {
-      return 'Title cannot be empty';
-    }
-    if (sanitized.length > 100) {
-      return 'Title must be 100 characters or less';
-    }
-    return null;
-  }
-
-  String? _validateDescription(String? value) {
-    if (value == null) return null;
-    final sanitized = _sanitizeInput(value);
-    if (sanitized.length > 500) {
-      return 'Description must be 500 characters or less';
-    }
-    return null;
-  }
-
-  void _showEditDialog() {
-    final formKey = GlobalKey<FormState>();
-    final titleController = TextEditingController(text: widget.todo.title);
-    final descriptionController =
-        TextEditingController(text: widget.todo.description);
-    final titleFocusNode = FocusNode();
-    final descriptionFocusNode = FocusNode();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      titleFocusNode.requestFocus();
-    });
-
-    showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-        child: AlertDialog(
-          backgroundColor: Theme.of(context).cardColor.withOpacity(0.9),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: const Text('Edit Task'),
-          content: Form(
-            key: formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextFormField(
-                  controller: titleController,
-                  focusNode: titleFocusNode,
-                  validator: _validateTitle,
-                  maxLength: 100,
-                  textCapitalization: TextCapitalization.sentences,
-                  textInputAction: TextInputAction.next,
-                  onFieldSubmitted: (_) => descriptionFocusNode.requestFocus(),
-                  decoration: const InputDecoration(labelText: 'Title *'),
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: descriptionController,
-                  focusNode: descriptionFocusNode,
-                  validator: _validateDescription,
-                  maxLength: 500,
-                  maxLines: 5,
-                  textCapitalization: TextCapitalization.sentences,
-                  textInputAction: TextInputAction.done,
-                  decoration: const InputDecoration(
-                    labelText: 'Description (Optional)',
-                  ),
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                if (formKey.currentState!.validate()) {
-                  final updatedTodo = widget.todo.copyWith(
-                    title: _sanitizeInput(titleController.text),
-                    description: _sanitizeInput(descriptionController.text),
-                  );
-                  ref.read(todoRepositoryProvider).saveTodo(updatedTodo);
-                  Navigator.of(context).pop();
-                }
-              },
-              child: const Text('Save'),
-            ),
-          ],
-        ),
+  void _navigateToEditScreen() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => EditTaskScreen(todo: widget.todo),
       ),
-    ).then((_) {
-      titleController.dispose();
-      descriptionController.dispose();
-      titleFocusNode.dispose();
-      descriptionFocusNode.dispose();
-    });
+    );
   }
 
   @override
@@ -263,7 +161,7 @@ class _TodoListItemState extends ConsumerState<TodoListItem>
               ),
               trailing: IconButton(
                 icon: const Icon(Icons.edit_rounded),
-                onPressed: _showEditDialog,
+                onPressed: _navigateToEditScreen,
                 tooltip: 'Edit Task',
                 splashRadius: 24,
               ),
