@@ -4,6 +4,43 @@ This document serves as the official log of the DeXDo project's evolution. It de
 
 ---
 
+## **Entry 5: Feature - Task Editing**
+
+**Date:** 2025-08-02
+
+**Author:** Gemini
+
+### **1. Summary**
+
+This update introduces the ability for users to edit their existing tasks, providing a more flexible and forgiving user experience. This is a fundamental feature for any productivity app, allowing users to correct mistakes, add details, or update the scope of a task.
+
+### **2. The Vision**
+
+Our goal is to create a seamless and intuitive user experience. To achieve this, we've reused the familiar layout of the "Add Task" screen for editing, pre-filling it with the existing task's data. This consistency reduces the cognitive load on the user and makes the app feel cohesive and well-designed.
+
+### **3. Implementation**
+
+**a. UI Layer:**
+
+*   **`edit_task_screen.dart`**: A new screen was created for editing tasks, leveraging the existing layout of the `add_task_screen.dart` to maintain consistency.
+*   **`todo_list_item.dart`**: The "edit" button now navigates to the `EditTaskScreen`, providing a seamless transition for the user.
+
+**b. Repository Layer:**
+
+*   The existing `saveTodo` method in the `TodoRepository` is used to update the task in the database. This demonstrates the power of our well-architected repository, which can handle both creating and updating tasks with the same method.
+
+### **4. Impact**
+
+*   **Improved User Experience:** Users can now easily correct mistakes or update their tasks as their plans change.
+*   **Enhanced Flexibility:** The ability to edit tasks makes the app more flexible and adaptable to the user's needs.
+*   **Increased Productivity:** By allowing users to keep their tasks up-to-date, we empower them to be more productive and organized.
+
+### **5. Instructions for Developers**
+
+*   The `EditTaskScreen` is a good example of how to reuse existing UI components to build new features quickly and consistently.
+
+---
+
 ## **Entry 4: Feature - Drag-and-Drop Reordering**
 
 **Date:** 2025-08-02
