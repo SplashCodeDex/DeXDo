@@ -66,6 +66,15 @@ class TodoRepository {
     });
   }
 
+  });
+  }
+
+  Future<void> clearCompletedTodos() async {
+    await isar.writeTxn(() async {
+      await isar.todos.where().filter().isDoneEqualTo(true).deleteAll();
+    });
+  }
+
   Stream<List<Todo>> watchTodos({SortBy sortBy = SortBy.position}) {
     QueryBuilder<Todo, Todo, QAfterSortBy> query = isar.todos.where();
 

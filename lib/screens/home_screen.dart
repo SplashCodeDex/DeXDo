@@ -19,9 +19,6 @@ enum FeedbackType {
   error,
 }
 
-error,
-}
-
 final sortByProvider = StateProvider<SortBy>((ref) => SortBy.position);
 
 class HomePage extends ConsumerWidget {
@@ -52,6 +49,13 @@ class HomePage extends ConsumerWidget {
                       ? SortBy.dueDate
                       : SortBy.position;
             },
+          ),
+          IconButton(
+            icon: Icon(
+              Icons.delete_sweep_rounded,
+              color: Theme.of(context).appBarTheme.iconTheme?.color,
+            ),
+            onPressed: () => _showClearCompletedDialog(context, ref),
           ),
         ],
       ),
@@ -200,6 +204,29 @@ class HomePage extends ConsumerWidget {
       );
       await ref.read(todoRepositoryProvider).saveTodo(newTodo);
     }
+  }
+
+  void _showClearCompletedDialog(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Clear Completed Tasks?'),
+        content: const Text('Are you sure you want to delete all completed tasks?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              ref.read(todoRepositoryProvider).clearCompletedTodos();
+              Navigator.of(context).pop();
+            },
+            child: const Text('Clear'),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildErrorState(String errorMessage) {
