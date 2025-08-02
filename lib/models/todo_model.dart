@@ -10,6 +10,7 @@ class Todo {
   final bool isDone;
   final DateTime createdAt;
   final DateTime? updatedAt;
+  final DateTime? dueDate;
 
   Todo({
     required this.title,
@@ -17,6 +18,7 @@ class Todo {
     this.isDone = false,
     DateTime? createdAt,
     this.updatedAt,
+    this.dueDate,
   }) : createdAt = createdAt ?? DateTime.now();
 
   Todo copyWith({
@@ -25,6 +27,7 @@ class Todo {
     bool? isDone,
     DateTime? createdAt,
     DateTime? updatedAt,
+    DateTime? dueDate,
   }) {
     return Todo(
       title: title ?? this.title,
@@ -32,6 +35,7 @@ class Todo {
       isDone: isDone ?? this.isDone,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? DateTime.now(),
+      dueDate: dueDate ?? this.dueDate,
     );
   }
 

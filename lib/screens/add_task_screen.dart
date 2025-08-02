@@ -56,7 +56,7 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
       return 'Title must be $_maxTitleLength characters or less';
     }
     // Check for potentially problematic characters
-    if (sanitized.contains(RegExp(r'[<>"\\]')))) {
+    if (sanitized.contains(RegExp(r'[<>"]'))) {
       return 'Title contains invalid characters';
     }
     return null;

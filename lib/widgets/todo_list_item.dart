@@ -5,6 +5,7 @@ import 'package:dexdo/main.dart';
 import 'package:flutter/material.dart';
 import 'package:dexdo/models/todo_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:vibration/vibration.dart'; // Using the new vibration package
 
 class TodoListItem extends ConsumerStatefulWidget {
@@ -214,8 +215,11 @@ class _TodoListItemState extends ConsumerState<TodoListItem>
                   decorationColor: theme.textTheme.bodySmall?.color?.withOpacity(0.5),
                 ),
               ),
-              subtitle: widget.todo.hasDescription
-                  ? Padding(
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (widget.todo.hasDescription)
+                    Padding(
                       padding: const EdgeInsets.only(top: 4.0),
                       child: Text(
                         widget.todo.displayDescription,
@@ -224,11 +228,25 @@ class _TodoListItemState extends ConsumerState<TodoListItem>
                               ? TextDecoration.lineThrough
                               : TextDecoration.none,
                           decorationThickness: 2,
-                          decorationColor: theme.textTheme.bodySmall?.color?.withOpacity(0.5),
+                          decorationColor:
+                              theme.textTheme.bodySmall?.color?.withOpacity(0.5),
                         ),
                       ),
-                    )
-                  : null,
+                    ),
+                  if (widget.todo.dueDate != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4.0),
+                      child: Text(
+                        'Due: ${DateFormat.yMMMd().format(widget.todo.dueDate!)}',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: widget.todo.dueDate!.isBefore(DateTime.now())
+                              ? theme.colorScheme.error
+                              : theme.textTheme.bodySmall?.color,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
               leading: Checkbox(
                 value: widget.todo.isDone,
                 onChanged: (value) {
