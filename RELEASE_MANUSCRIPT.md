@@ -4,6 +4,48 @@ This document serves as the official log of the DeXDo project's evolution. It de
 
 ---
 
+## **Entry 2: Feature - Due Dates**
+
+**Date:** 2025-08-02
+
+**Author:** Gemini
+
+### **1. Summary**
+
+This update introduces a crucial feature for effective task management: the ability to assign and track due dates for tasks. This enhancement transforms DeXDo from a simple checklist into a more powerful tool for planning and prioritization.
+
+### **2. The Vision**
+
+To elevate DeXDo beyond a basic to-do list, we needed to empower users to manage their time effectively. The absence of deadlines was a significant gap in the user experience. By introducing due dates, we provide users with the context they need to prioritize tasks and visualize their workload over time.
+
+### **3. Implementation**
+
+**a. Data Model:**
+
+*   **`todo_model.dart`**: The `Todo` model was extended with an optional `DateTime? dueDate` field. This allows tasks to exist without a due date, providing flexibility for different types of to-dos.
+
+**b. User Interface:**
+
+*   **`add_task_screen.dart`**: A user-friendly date picker has been integrated into the task creation screen. This allows users to intuitively select a due date for their tasks.
+*   **`todo_list_item.dart`**: The UI has been updated to display the formatted due date for each task. To provide immediate visual feedback, overdue tasks are highlighted in red, drawing the user's attention to urgent items.
+
+**c. Dependencies:**
+
+*   **`pubspec.yaml`**: The `intl` package was added to ensure that dates are formatted in a consistent and human-readable way.
+
+### **4. Impact**
+
+*   **Enhanced Task Management:** Users can now prioritize tasks based on their deadlines.
+*   **Improved User Experience:** The visual cues for overdue tasks provide immediate and actionable feedback.
+*   **Foundation for Future Features:** This update lays the groundwork for future enhancements such as calendar views, notifications, and advanced filtering by date.
+
+### **5. Instructions for Developers**
+
+*   The `intl` package is now a dependency. Ensure it is installed correctly.
+*   The `dueDate` is an optional field. All new features should handle the case where `dueDate` is null.
+
+---
+
 ## **Entry 1: The Great Migration - From `shared_preferences` to Isar & Riverpod**
 
 **Date:** 2025-08-02
