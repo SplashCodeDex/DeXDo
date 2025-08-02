@@ -1,6 +1,11 @@
 import 'package:isar/isar.dart';
 import '../models/todo_model.dart';
 
+enum SortBy {
+  creationDate,
+  dueDate,
+}
+
 class TodoRepository {
   final Isar isar;
 
@@ -28,8 +33,20 @@ class TodoRepository {
     });
   }
 
-  Stream<List<Todo>> watchTodos() {
-    return isar.todos.where().watch(fireImmediately: true);
+  Stream<List<Todo>> watchTodos({SortBy sortBy = SortBy.creationDate}) {
+    QueryBuilder<Todo, Todo, QAfterSortBy> query = isar.todos.where();
+
+    switch (sortBy) {
+      case SortBy.creationDate:
+        query = query.sortByCreatedAtDesc();
+        break;
+      case SortBy.dueDate:
+        query = query.sortByDueDate();
+        break;
+    }
+
+    return query.watch(fireImmediately: true);
   }
 }
+
 

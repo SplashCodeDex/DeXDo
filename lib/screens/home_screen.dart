@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:dexdo/main.dart';
 import 'package:dexdo/screens/add_task_screen.dart';
 import 'package:dexdo/widgets/todo_list_item.dart';
+import 'package:dexdo/repositories/todo_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:dexdo/models/todo_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -18,12 +19,15 @@ enum FeedbackType {
   error,
 }
 
+final sortByProvider = StateProvider<SortBy>((ref) => SortBy.creationDate);
+
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final todosStream = ref.watch(todoRepositoryProvider).watchTodos();
+    final sortBy = ref.watch(sortByProvider);
+    final todosStream = ref.watch(todoRepositoryProvider).watchTodos(sortBy: sortBy);
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -40,7 +44,10 @@ class HomePage extends ConsumerWidget {
               color: Theme.of(context).appBarTheme.iconTheme?.color,
             ),
             onPressed: () {
-              // TODO: Implement sorting
+              ref.read(sortByProvider.notifier).state =
+                  sortBy == SortBy.creationDate
+                      ? SortBy.dueDate
+                      : SortBy.creationDate;
             },
           ),
         ],
