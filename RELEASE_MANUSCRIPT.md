@@ -4,6 +4,43 @@ This document serves as the official log of the DeXDo project's evolution. It de
 
 ---
 
+## **Entry 3: Feature - Sorting by Due Date**
+
+**Date:** 2025-08-02
+
+**Author:** Gemini
+
+### **1. Summary**
+
+This update builds upon the due date feature by introducing the ability to sort tasks by their due date. This provides users with a more flexible and powerful way to organize and prioritize their to-do list.
+
+### **2. The Vision**
+
+Simply having due dates is not enough. To truly empower users, we need to provide them with the tools to manage their tasks effectively. Sorting by due date is a natural extension of the due date feature, allowing users to quickly identify upcoming deadlines and plan their work accordingly.
+
+### **3. Implementation**
+
+**a. Repository Layer:**
+
+*   **`todo_repository.dart`**: A `SortBy` enum was introduced to define the available sorting options (`creationDate` and `dueDate`). The `watchTodos` method was updated to accept a `SortBy` parameter, enabling dynamic sorting of tasks at the data layer.
+
+**b. UI Layer:**
+
+*   **`home_screen.dart`**: A `StateProvider` was implemented to manage the current sort order. The sort button in the app bar now toggles between sorting by creation date and due date, providing a seamless user experience.
+
+### **4. Impact**
+
+*   **Enhanced Prioritization:** Users can now easily identify and focus on tasks with upcoming deadlines.
+*   **Improved Workflow:** The ability to switch between different sorting options allows users to customize their workflow to suit their needs.
+*   **Foundation for Future Features:** This update lays the groundwork for more advanced sorting and filtering options in the future.
+
+### **5. Instructions for Developers**
+
+*   The `SortBy` enum can be extended to include additional sorting options in the future.
+*   When adding new sorting options, ensure that the UI is updated to reflect the new functionality.
+
+---
+
 ## **Entry 2: Feature - Due Dates**
 
 **Date:** 2025-08-02
