@@ -15,9 +15,10 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _titleFocusNode = FocusNode();
-  final _descriptionFocusNode = FocusNode();
+  """  final _descriptionFocusNode = FocusNode();
   bool _isLoading = false;
   String? _errorMessage;
+  DateTime? _dueDate;
   static const int _maxTitleLength = 100;
   static const int _maxDescriptionLength = 500;
 
@@ -28,7 +29,7 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _titleFocusNode.requestFocus();
     });
-  }
+  }""
 
   @override
   void dispose() {
@@ -71,6 +72,20 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
     return null;
   }
 
+  void _pickDueDate() async {
+    final pickedDate = await showDatePicker(
+      context: context,
+      initialDate: _dueDate ?? DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2101),
+    );
+    if (pickedDate != null) {
+      setState(() {
+        _dueDate = pickedDate;
+      });
+    }
+  }
+
   void _submitTask() async {
     setState(() {
       _errorMessage = null;
@@ -87,6 +102,7 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
       final newTodo = Todo(
         title: sanitizedTitle,
         description: sanitizedDescription,
+        dueDate: _dueDate,
       );
       await ref.read(todoRepositoryProvider).saveTodo(newTodo);
       // Simulate a brief delay for better UX
@@ -224,6 +240,21 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
                       ),
                       counterText: '',
                     ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      TextButton.icon(
+                        onPressed: _pickDueDate,
+                        icon: const Icon(Icons.calendar_today),
+                        label: const Text('Set Due Date'),
+                      ),
+                      if (_dueDate != null)
+                        Text(
+                          'Due: \${_dueDate!.toLocal().toString().split(' ')[0]}',
+                          style: theme.textTheme.bodyMedium,
+                        ),
+                    ],
                   ),
                   const SizedBox(height: 32),
                   ElevatedButton(
