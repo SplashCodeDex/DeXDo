@@ -19,7 +19,10 @@ enum FeedbackType {
   error,
 }
 
-final sortByProvider = StateProvider<SortBy>((ref) => SortBy.creationDate);
+error,
+}
+
+final sortByProvider = StateProvider<SortBy>((ref) => SortBy.position);
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
@@ -45,9 +48,9 @@ class HomePage extends ConsumerWidget {
             ),
             onPressed: () {
               ref.read(sortByProvider.notifier).state =
-                  sortBy == SortBy.creationDate
+                  sortBy == SortBy.position
                       ? SortBy.dueDate
-                      : SortBy.creationDate;
+                      : SortBy.position;
             },
           ),
         ],
@@ -83,7 +86,9 @@ class HomePage extends ConsumerWidget {
 
                   return ReorderableListView(
                     onReorder: (oldIndex, newIndex) {
-                      // TODO: Implement reordering with Isar
+                      ref
+                          .read(todoRepositoryProvider)
+                          .updateTodoPosition(oldIndex, newIndex);
                     },
                     padding: const EdgeInsets.only(top: 100, bottom: 80),
                     children: <Widget>[

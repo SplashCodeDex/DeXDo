@@ -11,6 +11,7 @@ class Todo {
   final DateTime createdAt;
   final DateTime? updatedAt;
   final DateTime? dueDate;
+  final int position;
 
   Todo({
     required this.title,
@@ -19,6 +20,7 @@ class Todo {
     DateTime? createdAt,
     this.updatedAt,
     this.dueDate,
+    this.position = 0,
   }) : createdAt = createdAt ?? DateTime.now();
 
   Todo copyWith({
@@ -28,6 +30,7 @@ class Todo {
     DateTime? createdAt,
     DateTime? updatedAt,
     DateTime? dueDate,
+    int? position,
   }) {
     return Todo(
       title: title ?? this.title,
@@ -36,6 +39,7 @@ class Todo {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? DateTime.now(),
       dueDate: dueDate ?? this.dueDate,
+      position: position ?? this.position,
     );
   }
 
