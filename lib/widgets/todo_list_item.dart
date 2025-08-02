@@ -1,27 +1,25 @@
 import 'dart:io';
 import 'dart:ui';
 
+import 'package:dexdo/main.dart';
 import 'package:flutter/material.dart';
 import 'package:dexdo/models/todo_model.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:vibration/vibration.dart'; // Using the new vibration package
 
-class TodoListItem extends StatefulWidget {
+class TodoListItem extends ConsumerStatefulWidget {
   final Todo todo;
-  final Function(bool?) onchanged;
-  final Function(Todo) onUpdate;
 
   const TodoListItem({
     super.key,
     required this.todo,
-    required this.onchanged,
-    required this.onUpdate,
   });
 
   @override
-  State<TodoListItem> createState() => _TodoListItemState();
+  ConsumerState<TodoListItem> createState() => _TodoListItemState();
 }
 
-class _TodoListItemState extends State<TodoListItem>
+class _TodoListItemState extends ConsumerState<TodoListItem>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
@@ -174,7 +172,7 @@ class _TodoListItemState extends State<TodoListItem>
                     title: _sanitizeInput(titleController.text),
                     description: _sanitizeInput(descriptionController.text),
                   );
-                  widget.onUpdate(updatedTodo);
+                  ref.read(todoRepositoryProvider).saveTodo(updatedTodo);
                   Navigator.of(context).pop();
                 }
               },
@@ -235,7 +233,8 @@ class _TodoListItemState extends State<TodoListItem>
                 value: widget.todo.isDone,
                 onChanged: (value) {
                   _provideFeedback();
-                  widget.onchanged(value);
+                  final updatedTodo = widget.todo.copyWith(isDone: value);
+                  ref.read(todoRepositoryProvider).saveTodo(updatedTodo);
                 },
                 activeColor: theme.colorScheme.primary,
                 checkColor: theme.colorScheme.onPrimary,
