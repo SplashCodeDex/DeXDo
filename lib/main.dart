@@ -1,11 +1,32 @@
 
+import 'package:dexdo/models/todo_model.dart';
+import 'package:dexdo/repositories/todo_repository.dart';
 import 'package:dexdo/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:dexdo/screens/home_screen.dart';
 import 'package:dexdo/widgets/error_boundary.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:isar/isar.dart';
+import 'package:path_provider/path_provider.dart';
 
-void main() {
+// Provider for the Isar instance
+final isarProvider = FutureProvider<Isar>((ref) async {
+  final dir = await getApplicationDocumentsDirectory();
+  return await Isar.open(
+    [TodoSchema],
+    directory: dir.path,
+  );
+});
+
+// Provider for the TodoRepository
+final todoRepositoryProvider = Provider<TodoRepository>((ref) {
+  final isar = ref.watch(isarProvider).asData!.value;
+  return TodoRepository(isar);
+});
+
+
+void main() async {
   // Ensure Flutter is initialized
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -25,7 +46,7 @@ void main() {
     ),
   );
 
-  runApp(const DeXDo());
+  runApp(const ProviderScope(child: DeXDo()));
 }
 
 class DeXDo extends StatelessWidget {

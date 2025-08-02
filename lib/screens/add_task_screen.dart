@@ -1,14 +1,16 @@
+import 'package:dexdo/main.dart';
+import 'package:dexdo/models/todo_model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-
-class AddTaskScreen extends StatefulWidget {
+class AddTaskScreen extends ConsumerStatefulWidget {
   const AddTaskScreen({super.key});
 
   @override
-  State<AddTaskScreen> createState() => _AddTaskScreenState();
+  ConsumerState<AddTaskScreen> createState() => _AddTaskScreenState();
 }
 
-class _AddTaskScreenState extends State<AddTaskScreen> {
+class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
@@ -54,7 +56,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
       return 'Title must be $_maxTitleLength characters or less';
     }
     // Check for potentially problematic characters
-    if (sanitized.contains(RegExp(r'[<>"\\]'))) {
+    if (sanitized.contains(RegExp(r'[<>"\\]')))) {
       return 'Title contains invalid characters';
     }
     return null;
@@ -82,13 +84,15 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
     try {
       final sanitizedTitle = _sanitizeInput(_titleController.text);
       final sanitizedDescription = _sanitizeInput(_descriptionController.text);
+      final newTodo = Todo(
+        title: sanitizedTitle,
+        description: sanitizedDescription,
+      );
+      await ref.read(todoRepositoryProvider).saveTodo(newTodo);
       // Simulate a brief delay for better UX
       await Future.delayed(const Duration(milliseconds: 200));
       if (mounted) {
-        Navigator.of(context).pop({
-          'title': sanitizedTitle,
-          'description': sanitizedDescription,
-        });
+        Navigator.of(context).pop();
       }
     } catch (e) {
       if (mounted) {
@@ -106,27 +110,27 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(kToolbarHeight), // Standard AppBar height
-          child: AppBar(
-            title: Text(
-              'Add New Task',
-              style: theme.appBarTheme.titleTextStyle,
+        preferredSize: const Size.fromHeight(kToolbarHeight), // Standard AppBar height
+        child: AppBar(
+          title: Text(
+            'Add New Task',
+            style: theme.appBarTheme.titleTextStyle,
+          ),
+          leading: IconButton(
+            icon: Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: theme.appBarTheme.iconTheme?.color,
             ),
-            leading: IconButton(
-              icon: Icon(
-                Icons.arrow_back_ios_new_rounded,
-                color: theme.appBarTheme.iconTheme?.color,
-              ),
-              onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
-              tooltip: 'Go back',
-            ),
+            onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
+            tooltip: 'Go back',
           ),
         ),
+      ),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              theme.colorScheme.primary.withValues(alpha: 0.1),
+              theme.colorScheme.primary.withOpacity(0.1),
               theme.colorScheme.tertiary.withOpacity(0.1),
             ],
             begin: Alignment.topLeft,
@@ -258,3 +262,4 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
     );
   }
 }
+
