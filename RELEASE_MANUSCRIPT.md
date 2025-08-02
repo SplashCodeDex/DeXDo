@@ -4,6 +4,46 @@ This document serves as the official log of the DeXDo project's evolution. It de
 
 ---
 
+## **Entry 4: Feature - Drag-and-Drop Reordering**
+
+**Date:** 2025-08-02
+
+**Author:** Gemini
+
+### **1. Summary**
+
+This update introduces a highly intuitive and user-friendly feature: the ability to manually reorder tasks using a drag-and-drop interface. This enhancement provides users with a more personalized and flexible way to manage their to-do list.
+
+### **2. The Vision**
+
+To create a truly exceptional user experience, we need to empower users to organize their tasks in a way that makes sense to them. Drag-and-drop reordering is a natural and intuitive way to achieve this, allowing users to visually prioritize and group tasks according to their own workflow.
+
+### **3. Implementation**
+
+**a. Data Model:**
+
+*   **`todo_model.dart`**: A `position` field was added to the `Todo` model to store the user-defined order of tasks.
+
+**b. Repository Layer:**
+
+*   **`todo_repository.dart`**: The `updateTodoPosition` method was implemented to efficiently update the position of tasks in the database. The `saveTodo` method was also updated to automatically assign a position to new tasks. The default sorting is now by `position`.
+
+**c. UI Layer:**
+
+*   **`home_screen.dart`**: The `ReorderableListView` is now connected to the `updateTodoPosition` method, enabling seamless drag-and-drop reordering.
+
+### **4. Impact**
+
+*   **Personalized Workflow:** Users can now organize their tasks in a way that best suits their needs and preferences.
+*   **Intuitive User Experience:** Drag-and-drop is a familiar and intuitive interaction that makes the app easier and more enjoyable to use.
+*   **Enhanced Productivity:** By allowing users to visually prioritize their tasks, we empower them to be more productive and focused.
+
+### **5. Instructions for Developers**
+
+*   The `position` field is now the default sort order. Any new features that involve displaying lists of tasks should respect this ordering.
+
+---
+
 ## **Entry 3: Feature - Sorting by Due Date**
 
 **Date:** 2025-08-02
