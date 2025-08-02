@@ -2,24 +2,42 @@
 
 DeXDo is a simple and intuitive to-do application designed to help you stay organized and productive.
 
-This repository contains the source code for the DeXDo mobile application.
+This repository contains the source code for the DeXDo mobile application, built with Flutter.
 
-## Features (Planned)
+## Architectural Overview
 
-* Create, edit, and delete tasks
-* Set due dates and reminders
-* Organize tasks into lists
-* Prioritize tasks
-* And much more!
+DeXDo is built on a modern and robust architecture to ensure scalability, performance, and maintainability.
+
+*   **Database:** We use the **Isar Database**, a fast, transactional, and queryable NoSQL database for local data persistence.
+*   **State Management:** We use **Riverpod** for state management, providing a clean and efficient way to manage application state and separate UI from business logic.
+*   **Code Generation:** We use `build_runner` to generate necessary files for Isar. If you make changes to the data models in `lib/models/`, you must run the code generator.
+
+For a detailed explanation of the project's architecture and its evolution, please see the [RELEASE_MANUSCRIPT.md](RELEASE_MANUSCRIPT.md).
 
 ## Getting Started
 
-This project is currently under development. Instructions on how to build and run the application will be provided soon.
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/SplashCodeDex/DeXDo.git
+    ```
+2.  **Install dependencies:**
+    ```bash
+    flutter pub get
+    ```
+3.  **Run the code generator:**
+    ```bash
+    flutter pub run build_runner build --delete-conflicting-outputs
+    ```
+4.  **Run the app:**
+    ```bash
+    flutter run
+    ```
 
 ## Contributing
 
-We welcome contributions to DeXDo! If you'd like to contribute, please fork the repository and submit a pull request. We will have more formal contribution guidelines in the future.
+We welcome contributions to DeXDo! If you'd like to contribute, please read our [CONTRIBUTING.md](CONTRIBUTING.md) file for guidelines on how to get started.
 
 ## License
 
 This project is licensed under the MIT License - see the `LICENSE` file for details.
+
