@@ -21,6 +21,9 @@ class _EditTaskScreenState extends ConsumerState<EditTaskScreen> {
   bool _isLoading = false;
   String? _errorMessage;
   DateTime? _dueDate;
+  bool _isRecurring = false;
+  RecurrenceType? _recurrenceType;
+  DateTime? _recurrenceEndDate;
   static const int _maxTitleLength = 100;
   static const int _maxDescriptionLength = 500;
 
@@ -31,10 +34,27 @@ class _EditTaskScreenState extends ConsumerState<EditTaskScreen> {
     _descriptionController =
         TextEditingController(text: widget.todo.description);
     _dueDate = widget.todo.dueDate;
+    _isRecurring = widget.todo.isRecurring;
+    _recurrenceType = widget.todo.recurrenceType;
+    _recurrenceEndDate = widget.todo.recurrenceEndDate;
     // Auto-focus on title field when screen opens
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _titleFocusNode.requestFocus();
     });
+  }
+
+  void _pickRecurrenceEndDate() async {
+    final pickedDate = await showDatePicker(
+      context: context,
+      initialDate: _recurrenceEndDate ?? DateTime.now().add(const Duration(days: 365)),
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2101),
+    );
+    if (pickedDate != null) {
+      setState(() {
+        _recurrenceEndDate = pickedDate;
+      });
+    }
   }
 
   @override
@@ -109,8 +129,13 @@ class _EditTaskScreenState extends ConsumerState<EditTaskScreen> {
         title: sanitizedTitle,
         description: sanitizedDescription,
         dueDate: _dueDate,
+        isRecurring: _isRecurring,
+        recurrenceType: _isRecurring ? _recurrenceType : null,
+        recurrenceEndDate: _isRecurring ? _recurrenceEndDate : null,
+        createdAt: widget.todo.createdAt,
       );
-      await ref.read(todoRepositoryProvider).saveTodo(updatedTodo);
+      final todoRepository = await ref.read(todoRepositoryProvider.future);
+      await todoRepository.saveTodo(updatedTodo);
       // Simulate a brief delay for better UX
       await Future.delayed(const Duration(milliseconds: 200));
       if (mounted) {
@@ -262,6 +287,68 @@ class _EditTaskScreenState extends ConsumerState<EditTaskScreen> {
                         ),
                     ],
                   ),
+                  const SizedBox(height: 16),
+                  SwitchListTile(
+                    title: Text(
+                      'Recurring Task',
+                      style: theme.textTheme.bodyLarge,
+                    ),
+                    value: _isRecurring,
+                    onChanged: (bool value) {
+                      setState(() {
+                        _isRecurring = value;
+                        if (!value) {
+                          _recurrenceType = null;
+                          _recurrenceEndDate = null;
+                        } else {
+                          _recurrenceType = RecurrenceType.daily; // Default to daily
+                        }
+                      });
+                    },
+                    activeColor: theme.colorScheme.primary,
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                  if (_isRecurring) ...[
+                    const SizedBox(height: 16),
+                    DropdownButtonFormField<RecurrenceType>(
+                      value: _recurrenceType,
+                      decoration: InputDecoration(
+                        labelText: 'Recurrence Type',
+                        labelStyle: theme.textTheme.bodyLarge,
+                        filled: true,
+                        fillColor: theme.inputDecorationTheme.fillColor,
+                        border: theme.inputDecorationTheme.border,
+                        enabledBorder: theme.inputDecorationTheme.border,
+                        focusedBorder: theme.inputDecorationTheme.border,
+                      ),
+                      items: RecurrenceType.values.map((type) {
+                        return DropdownMenuItem(
+                          value: type,
+                          child: Text(type.name.capitalize()),
+                        );
+                      }).toList(),
+                      onChanged: (RecurrenceType? newValue) {
+                        setState(() {
+                          _recurrenceType = newValue;
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        TextButton.icon(
+                          onPressed: _pickRecurrenceEndDate,
+                          icon: const Icon(Icons.event_busy),
+                          label: const Text('Recurrence End Date'),
+                        ),
+                        if (_recurrenceEndDate != null)
+                          Text(
+                            'Ends: ${ _recurrenceEndDate!.toLocal().toString().split(' ')[0]}',
+                            style: theme.textTheme.bodyMedium,
+                          ),
+                      ],
+                    ),
+                  ],
                   const SizedBox(height: 32),
                   ElevatedButton(
                     onPressed: _isLoading ? null : _submitTask,
@@ -297,5 +384,11 @@ class _EditTaskScreenState extends ConsumerState<EditTaskScreen> {
         ),
       ),
     );
+  }
+}
+
+extension StringExtension on String {
+  String capitalize() {
+    return "${this[0].toUpperCase()}${substring(1)}";
   }
 }

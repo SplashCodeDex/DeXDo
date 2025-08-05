@@ -11,26 +11,37 @@ class Todo {
   final DateTime createdAt;
   final DateTime? updatedAt;
   final DateTime? dueDate;
+  @Index()
   final int position;
+  final bool isRecurring;
+  @enumerated
+  final RecurrenceType recurrenceType;
+  final DateTime? recurrenceEndDate;
 
   Todo({
     required this.title,
     this.description = '',
     this.isDone = false,
-    DateTime? createdAt,
+    required this.createdAt,
     this.updatedAt,
     this.dueDate,
     this.position = 0,
-  }) : createdAt = createdAt ?? DateTime.now();
+    this.isRecurring = false,
+    this.recurrenceType = RecurrenceType.daily,
+    this.recurrenceEndDate,
+  });
 
   Todo copyWith({
     String? title,
     String? description,
     bool? isDone,
-    DateTime? createdAt,
+    required DateTime createdAt,
     DateTime? updatedAt,
     DateTime? dueDate,
     int? position,
+    bool? isRecurring,
+    RecurrenceType? recurrenceType,
+    DateTime? recurrenceEndDate,
   }) {
     return Todo(
       title: title ?? this.title,
@@ -40,6 +51,9 @@ class Todo {
       updatedAt: updatedAt ?? DateTime.now(),
       dueDate: dueDate ?? this.dueDate,
       position: position ?? this.position,
+      isRecurring: isRecurring ?? this.isRecurring,
+      recurrenceType: recurrenceType ?? this.recurrenceType,
+      recurrenceEndDate: recurrenceEndDate ?? this.recurrenceEndDate,
     );
   }
 
@@ -54,7 +68,7 @@ class Todo {
 
   @override
   String toString() {
-    return 'Todo(id: $id, title: $title, isDone: $isDone)';
+    return 'Todo(id: $id, title: $title, isDone: $isDone, isRecurring: $isRecurring, recurrenceType: $recurrenceType, recurrenceEndDate: $recurrenceEndDate)';
   }
 
   // Helper methods
@@ -66,3 +80,9 @@ class Todo {
   String get displayDescription => description.trim();
 }
 
+enum RecurrenceType {
+  daily,
+  weekly,
+  monthly,
+  yearly,
+}

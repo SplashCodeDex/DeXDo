@@ -1,5 +1,7 @@
 import 'dart:io';
+import 'package:dexdo/repositories/todo_repository.dart';
 import 'package:dexdo/screens/edit_task_screen.dart';
+import 'package:dexdo/main.dart';
 import 'package:flutter/material.dart';
 import 'package:dexdo/models/todo_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,10 +10,12 @@ import 'package:vibration/vibration.dart'; // Using the new vibration package
 
 class TodoListItem extends ConsumerStatefulWidget {
   final Todo todo;
+  final TodoRepository todoRepository;
 
   const TodoListItem({
     super.key,
     required this.todo,
+    required this.todoRepository,
   });
 
   @override
@@ -149,8 +153,8 @@ class _TodoListItemState extends ConsumerState<TodoListItem>
                 value: widget.todo.isDone,
                 onChanged: (value) {
                   _provideFeedback();
-                  final updatedTodo = widget.todo.copyWith(isDone: value);
-                  ref.read(todoRepositoryProvider).saveTodo(updatedTodo);
+                  final updatedTodo = widget.todo.copyWith(isDone: value, createdAt: widget.todo.createdAt);
+                  widget.todoRepository.saveTodo(updatedTodo);
                 },
                 activeColor: theme.colorScheme.primary,
                 checkColor: theme.colorScheme.onPrimary,

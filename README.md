@@ -8,6 +8,7 @@ DeXDo is a simple and intuitive to-do application designed to help you stay orga
 *   **Due Dates:** Assign due dates to your tasks to stay on track.
 *   **Sort by Due Date:** Sort your tasks by due date to prioritize your work.
 *   **Drag-and-Drop Reordering:** Manually reorder your tasks to fit your workflow.
+*   **Clear Completed:** Quickly clear all completed tasks to keep your list tidy.
 *   **Intuitive UI:** A clean and user-friendly interface for a seamless experience.
 
 This repository contains the source code for the DeXDo mobile application, built with Flutter.

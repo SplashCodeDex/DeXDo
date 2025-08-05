@@ -20,6 +20,8 @@ enum FeedbackType {
 }
 
 final sortByProvider = StateProvider<SortBy>((ref) => SortBy.position);
+final filterIsDoneProvider = StateProvider<bool?>((ref) => null); // null: all, true: completed, false: incomplete
+final searchQueryProvider = StateProvider<String>((ref) => '');
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
@@ -27,17 +29,68 @@ class HomePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final sortBy = ref.watch(sortByProvider);
-    final todosStream = ref.watch(todoRepositoryProvider).watchTodos(sortBy: sortBy);
+    final filterIsDone = ref.watch(filterIsDoneProvider);
+    final searchQuery = ref.watch(searchQueryProvider);
+    final todoRepositoryAsyncValue = ref.watch(todoRepositoryProvider);
 
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: Text(
-          'DeXDo',
-          style: Theme.of(context).appBarTheme.titleTextStyle,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'DeXDo',
+              style: Theme.of(context).appBarTheme.titleTextStyle,
+            ),
+            const SizedBox(height: 8),
+            Container(
+              height: 40, // Adjust height as needed
+              child: TextField(
+                onChanged: (value) => ref.read(searchQueryProvider.notifier).state = value,
+                decoration: InputDecoration(
+                  hintText: 'Search tasks...',
+                  hintStyle: TextStyle(color: Theme.of(context).appBarTheme.titleTextStyle?.color?.withOpacity(0.7)),
+                  prefixIcon: Icon(Icons.search, color: Theme.of(context).appBarTheme.iconTheme?.color),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                  filled: true,
+                  fillColor: Theme.of(context).appBarTheme.backgroundColor?.withOpacity(0.1),
+                  contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+                ),
+                style: TextStyle(color: Theme.of(context).appBarTheme.titleTextStyle?.color),
+              ),
+            ),
+          ],
         ),
+        toolbarHeight: 100, // Adjust toolbar height to accommodate search bar
         centerTitle: false,
         actions: [
+          PopupMenuButton<bool?>(
+            icon: Icon(
+              Icons.filter_list,
+              color: Theme.of(context).appBarTheme.iconTheme?.color,
+            ),
+            onSelected: (value) {
+              ref.read(filterIsDoneProvider.notifier).state = value;
+            },
+            itemBuilder: (BuildContext context) => <PopupMenuEntry<bool?>>[
+              const PopupMenuItem<bool?>(
+                value: null,
+                child: Text('All Tasks'),
+              ),
+              const PopupMenuItem<bool?>(
+                value: true,
+                child: Text('Completed Tasks'),
+              ),
+              const PopupMenuItem<bool?>(
+                value: false,
+                child: Text('Incomplete Tasks'),
+              ),
+            ],
+          ),
           IconButton(
             icon: Icon(
               Icons.sort,
@@ -55,7 +108,7 @@ class HomePage extends ConsumerWidget {
               Icons.delete_sweep_rounded,
               color: Theme.of(context).appBarTheme.iconTheme?.color,
             ),
-            onPressed: () => _showClearCompletedDialog(context, ref),
+            onPressed: () => _showClearCompletedDialog(context, ref, todoRepositoryAsyncValue.value!),
           ),
         ],
       ),
@@ -75,81 +128,90 @@ class HomePage extends ConsumerWidget {
           child: Container(
             color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.7),
             child: SafeArea(
-              child: StreamBuilder<List<Todo>>(
-                stream: todosStream,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return _buildLoadingState();
-                  } else if (snapshot.hasError) {
-                    return _buildErrorState(snapshot.error.toString());
-                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return _buildEmptyState();
-                  }
+              child: todoRepositoryAsyncValue.when(
+                data: (todoRepository) {
+                  final todosStream = todoRepository.watchTodos(
+                    sortBy: sortBy,
+                    isDone: filterIsDone,
+                    searchQuery: searchQuery,
+                  );
+                  return StreamBuilder<List<Todo>>(
+                    stream: todosStream,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return _buildLoadingState();
+                      } else if (snapshot.hasError) {
+                        return _buildErrorState(snapshot.error.toString());
+                      } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                        return _buildEmptyState();
+                      }
 
-                  final todos = snapshot.data!;
+                      final todos = snapshot.data!;
 
-                  return ReorderableListView(
-                    onReorder: (oldIndex, newIndex) {
-                      ref
-                          .read(todoRepositoryProvider)
-                          .updateTodoPosition(oldIndex, newIndex);
+                      return ReorderableListView(
+                        onReorder: (oldIndex, newIndex) {
+                          todoRepository.updateTodoPosition(oldIndex, newIndex);
+                        },
+                        padding: const EdgeInsets.only(top: 100, bottom: 80),
+                        children: <Widget>[
+                          for (final todo in todos)
+                            Dismissible(
+                              key: Key(todo.id.toString()),
+                              direction: DismissDirection.horizontal,
+                              onDismissed: (direction) {
+                                todoRepository.deleteTodo(todo.id);
+                              },
+                              background: Container(
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.error,
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                alignment: Alignment.centerLeft,
+                                padding: const EdgeInsets.only(left: 20),
+                                child: const Icon(
+                                  Icons.delete_forever_rounded,
+                                  color: Colors.white,
+                                  size: 30,
+                                ),
+                              ),
+                              secondaryBackground: Container(
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.primary,
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                alignment: Alignment.centerRight,
+                                padding: const EdgeInsets.only(right: 20),
+                                child: const Icon(
+                                  Icons.check_circle_outline_rounded,
+                                  color: Colors.white,
+                                  size: 30,
+                                ),
+                              ),
+                              child: TodoListItem(
+                                todo: todo,
+                                todoRepository: todoRepository,
+                              ),
+                            ),
+                        ],
+                      );
                     },
-                    padding: const EdgeInsets.only(top: 100, bottom: 80),
-                    children: <Widget>[
-                      for (final todo in todos)
-                        Dismissible(
-                          key: Key(todo.id.toString()),
-                          direction: DismissDirection.horizontal,
-                          onDismissed: (direction) {
-                            ref.read(todoRepositoryProvider).deleteTodo(todo.id);
-                          },
-                          background: Container(
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.error,
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            alignment: Alignment.centerLeft,
-                            padding: const EdgeInsets.only(left: 20),
-                            child: const Icon(
-                              Icons.delete_forever_rounded,
-                              color: Colors.white,
-                              size: 30,
-                            ),
-                          ),
-                          secondaryBackground: Container(
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.primary,
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            alignment: Alignment.centerRight,
-                            padding: const EdgeInsets.only(right: 20),
-                            child: const Icon(
-                              Icons.check_circle_outline_rounded,
-                              color: Colors.white,
-                              size: 30,
-                            ),
-                          ),
-                          child: TodoListItem(
-                            key: ValueKey(todo.id),
-                            todo: todo,
-                          ),
-                        ),
-                    ],
                   );
                 },
+                loading: () => _buildLoadingState(),
+                error: (err, stack) => _buildErrorState(err.toString()),
               ),
             ),
           ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _addTask(context, ref),
+        onPressed: () => _addTask(context, ref, todoRepositoryAsyncValue.value!),
         child: const Icon(Icons.add),
       ),
     );
   }
 
-  Future<void> _addTask(BuildContext context, WidgetRef ref) async {
+  Future<void> _addTask(BuildContext context, WidgetRef ref, TodoRepository todoRepository) async {
     final result = await Navigator.of(context).push<Map<String, String>>(
       PageRouteBuilder(
         pageBuilder: (context, animation, secondaryAnimation) =>
@@ -201,12 +263,13 @@ class HomePage extends ConsumerWidget {
       final newTodo = Todo(
         title: result['title']!,
         description: result['description'] ?? '',
+        createdAt: DateTime.now(),
       );
-      await ref.read(todoRepositoryProvider).saveTodo(newTodo);
+      await todoRepository.saveTodo(newTodo);
     }
   }
 
-  void _showClearCompletedDialog(BuildContext context, WidgetRef ref) {
+  void _showClearCompletedDialog(BuildContext context, WidgetRef ref, TodoRepository todoRepository) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -219,7 +282,7 @@ class HomePage extends ConsumerWidget {
           ),
           ElevatedButton(
             onPressed: () {
-              ref.read(todoRepositoryProvider).clearCompletedTodos();
+              todoRepository.clearCompletedTodos();
               Navigator.of(context).pop();
             },
             child: const Text('Clear'),
