@@ -121,12 +121,10 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
         description: sanitizedDescription,
         dueDate: _dueDate,
         isRecurring: _isRecurring,
-        recurrenceType: _isRecurring ? _recurrenceType ?? RecurrenceType.daily : RecurrenceType.daily,
+        recurrenceType: _isRecurring ? _recurrenceType : null,
         recurrenceEndDate: _isRecurring ? _recurrenceEndDate : null,
-        createdAt: DateTime.now(),
       );
-      final todoRepository = await ref.read(todoRepositoryProvider.future);
-      await todoRepository.saveTodo(newTodo);
+      await ref.read(todoRepositoryProvider).saveTodo(newTodo);
       // Simulate a brief delay for better UX
       await Future.delayed(const Duration(milliseconds: 200));
       if (mounted) {
@@ -375,11 +373,5 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
         ),
       ),
     );
-  }
-}
-
-extension StringExtension on String {
-  String capitalize() {
-    return "${this[0].toUpperCase()}${substring(1)}";
   }
 }
