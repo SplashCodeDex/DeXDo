@@ -5,63 +5,34 @@ class AppTheme {
   // Private constructor
   AppTheme._();
 
-  // Light Theme Colors
-  static const Color _lightPrimaryColor = Color(0xFF5D5FEF);
-  static const Color _lightSecondaryColor = Color(0xFFF2F2F7);
-  static const Color _lightAccentColor = Color(0xFFFF9F43);
-  static const Color _lightBackgroundColor = Color(0xFFF5F8FF);
-  static const Color _lightTextColor = Color(0xFF333333);
-
-  // Dark Theme Colors
-  static const Color _darkPrimaryColor = Color(0xFF7E80FF);
-  static const Color _darkSecondaryColor = Color(0xFF1C1C1E);
-  static const Color _darkAccentColor = Color(0xFFFFB86C);
-  static const Color _darkBackgroundColor = Color(0xFF121212);
-  static const Color _darkTextColor = Color(0xFFF2F2F7);
+  // Seed color for the Material Design 3 color scheme
+  static const Color _seedColor = Color(0xFF0052D4);
 
   // Light Theme
   static final ThemeData lightTheme = ThemeData(
+    useMaterial3: true,
     brightness: Brightness.light,
-    primaryColor: _lightPrimaryColor,
-    scaffoldBackgroundColor: _lightBackgroundColor,
-    colorScheme: const ColorScheme.light(
-      primary: _lightPrimaryColor,
-      secondary: _lightSecondaryColor,
-      tertiary: _lightAccentColor,
-      background: _lightBackgroundColor,
-      onBackground: _lightTextColor,
-      error: Color(0xFFFF3B30),
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: _seedColor,
+      brightness: Brightness.light,
     ),
-    textTheme: GoogleFonts.poppinsTextTheme(ThemeData.light().textTheme).apply(
-      bodyColor: _lightTextColor,
-      displayColor: _lightTextColor,
-    ),
+    textTheme: GoogleFonts.poppinsTextTheme(ThemeData.light().textTheme),
     appBarTheme: const AppBarTheme(
       backgroundColor: Colors.transparent,
       elevation: 0,
-      iconTheme: IconThemeData(color: _lightPrimaryColor),
-      titleTextStyle: TextStyle(
-        color: _lightPrimaryColor,
-        fontSize: 22,
-        fontWeight: FontWeight.bold,
+    ),
+    cardTheme: CardTheme(
+      elevation: 1,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
       ),
     ),
     floatingActionButtonTheme: const FloatingActionButtonThemeData(
-      backgroundColor: _lightPrimaryColor,
-      foregroundColor: Colors.white,
-    ),
-    cardTheme: const CardThemeData(
-      elevation: 5,
-      shadowColor: Colors.black38,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(20)),
-      ),
-      color: Colors.white,
+      elevation: 1,
+      highlightElevation: 2,
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: _lightPrimaryColor,
-        foregroundColor: Colors.white,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
@@ -74,54 +45,34 @@ class AppTheme {
         borderSide: BorderSide.none,
       ),
       filled: true,
-      fillColor: _lightSecondaryColor,
     ),
-    useMaterial3: true,
   );
 
   // Dark Theme
   static final ThemeData darkTheme = ThemeData(
+    useMaterial3: true,
     brightness: Brightness.dark,
-    primaryColor: _darkPrimaryColor,
-    scaffoldBackgroundColor: _darkBackgroundColor,
-    colorScheme: const ColorScheme.dark(
-      primary: _darkPrimaryColor,
-      secondary: _darkSecondaryColor,
-      tertiary: _darkAccentColor,
-      background: _darkBackgroundColor,
-      onBackground: _darkTextColor,
-      error: Color(0xFFFF453A),
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: _seedColor,
+      brightness: Brightness.dark,
     ),
-    textTheme: GoogleFonts.poppinsTextTheme(ThemeData.dark().textTheme).apply(
-      bodyColor: _darkTextColor,
-      displayColor: _darkTextColor,
-    ),
+    textTheme: GoogleFonts.poppinsTextTheme(ThemeData.dark().textTheme),
     appBarTheme: const AppBarTheme(
       backgroundColor: Colors.transparent,
       elevation: 0,
-      iconTheme: IconThemeData(color: _darkPrimaryColor),
-      titleTextStyle: TextStyle(
-        color: _darkPrimaryColor,
-        fontSize: 22,
-        fontWeight: FontWeight.bold,
+    ),
+    cardTheme: CardTheme(
+      elevation: 1,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
       ),
     ),
     floatingActionButtonTheme: const FloatingActionButtonThemeData(
-      backgroundColor: _darkPrimaryColor,
-      foregroundColor: _darkTextColor,
-    ),
-    cardTheme: const CardThemeData(
-      elevation: 5,
-      shadowColor: Colors.black26,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(20)),
-      ),
-      color: _darkSecondaryColor,
+      elevation: 1,
+      highlightElevation: 2,
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: _darkPrimaryColor,
-        foregroundColor: _darkTextColor,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
@@ -134,8 +85,6 @@ class AppTheme {
         borderSide: BorderSide.none,
       ),
       filled: true,
-      fillColor: _darkSecondaryColor,
     ),
-    useMaterial3: true,
   );
 }

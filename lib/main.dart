@@ -20,8 +20,8 @@ final isarProvider = FutureProvider<Isar>((ref) async {
 });
 
 // Provider for the TodoRepository
-final todoRepositoryProvider = Provider<TodoRepository>((ref) {
-  final isar = ref.watch(isarProvider).asData!.value;
+final todoRepositoryProvider = FutureProvider<TodoRepository>((ref) async {
+  final isar = await ref.watch(isarProvider.future);
   return TodoRepository(isar);
 });
 
