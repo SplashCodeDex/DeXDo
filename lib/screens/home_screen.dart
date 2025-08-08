@@ -65,9 +65,9 @@ class HomePage extends ConsumerWidget {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
               } else if (snapshot.hasError) {
-                return _buildErrorState(snapshot.error.toString());
+                return _buildErrorState(context, snapshot.error.toString());
               } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                return _buildEmptyState();
+                return _buildEmptyState(context);
               }
 
               final todos = snapshot.data!;
@@ -98,7 +98,7 @@ class HomePage extends ConsumerWidget {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, stack) => _buildErrorState(err.toString()),
+        error: (err, stack) => _buildErrorState(context, err.toString()),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _addTask(context, ref, todoRepositoryAsyncValue.value!),
@@ -146,7 +146,7 @@ class HomePage extends ConsumerWidget {
     );
   }
 
-  Widget _buildErrorState(String errorMessage) {
+  Widget _buildErrorState(BuildContext context, String errorMessage) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -164,7 +164,7 @@ class HomePage extends ConsumerWidget {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(BuildContext context) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,

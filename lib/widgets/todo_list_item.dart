@@ -23,7 +23,7 @@ class TodoListItem extends StatelessWidget {
         leading: Checkbox(
           value: todo.isDone,
           onChanged: (value) {
-            final updatedTodo = todo.copyWith(isDone: value, updatedAt: DateTime.now());
+            final updatedTodo = todo.copyWith(isDone: value, updatedAt: DateTime.now(), createdAt: todo.createdAt);
             todoRepository.saveTodo(updatedTodo);
           },
         ),

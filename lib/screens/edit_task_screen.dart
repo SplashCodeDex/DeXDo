@@ -39,6 +39,7 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
         description: _descriptionController.text,
         dueDate: _dueDate,
         updatedAt: DateTime.now(),
+        createdAt: widget.todo.createdAt,
       );
       Navigator.of(context).pop(updatedTodo);
     }

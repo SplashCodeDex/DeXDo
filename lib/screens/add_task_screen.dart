@@ -1,5 +1,6 @@
 import 'package:dexdo/main.dart';
 import 'package:dexdo/models/todo_model.dart';
+import 'package:dexdo/utils/string_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -119,12 +120,13 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
       final newTodo = Todo(
         title: sanitizedTitle,
         description: sanitizedDescription,
+        createdAt: DateTime.now(),
         dueDate: _dueDate,
         isRecurring: _isRecurring,
-        recurrenceType: _isRecurring ? _recurrenceType : null,
+        recurrenceType: _isRecurring ? _recurrenceType ?? RecurrenceType.daily : RecurrenceType.daily,
         recurrenceEndDate: _isRecurring ? _recurrenceEndDate : null,
       );
-      await ref.read(todoRepositoryProvider).saveTodo(newTodo);
+      await ref.read(todoRepositoryProvider).value!.saveTodo(newTodo);
       // Simulate a brief delay for better UX
       await Future.delayed(const Duration(milliseconds: 200));
       if (mounted) {
