@@ -143,49 +143,51 @@ class _ErrorBoundaryState extends State<ErrorBoundary> {
                 ),
                 const SizedBox(height: 16),
                 if (_errorDetails != null) ...[
-                  TextButton(
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                          backgroundColor: const Color(0xFFF5F5DC),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          title: const Text(
-                            'Error Details',
-                            style: TextStyle(
-                              color: Color(0xFF4B4B4B),
-                              fontWeight: FontWeight.bold,
+                  Builder(
+                    builder: (scaffoldContext) => TextButton(
+                      onPressed: () {
+                        showDialog(
+                          context: scaffoldContext,
+                          builder: (context) => AlertDialog(
+                            backgroundColor: const Color(0xFFF5F5DC),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
                             ),
-                          ),
-                          content: SingleChildScrollView(
-                            child: Text(
-                              _errorDetails!.exception.toString(),
-                              style: const TextStyle(
+                            title: const Text(
+                              'Error Details',
+                              style: TextStyle(
                                 color: Color(0xFF4B4B4B),
-                                fontFamily: 'monospace',
-                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
+                            content: SingleChildScrollView(
+                              child: Text(
+                                _errorDetails!.exception.toString(),
+                                style: const TextStyle(
+                                  color: Color(0xFF4B4B4B),
+                                  fontFamily: 'monospace',
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.of(context).pop(),
+                                child: const Text(
+                                  'Close',
+                                  style: TextStyle(color: Color(0xFF4B4B4B)),
+                                ),
+                              ),
+                            ],
                           ),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.of(context).pop(),
-                              child: const Text(
-                                'Close',
-                                style: TextStyle(color: Color(0xFF4B4B4B)),
-                              ),
-                            ),
-                          ],
+                        );
+                      },
+                      child: Text(
+                        'Show Details',
+                        style: TextStyle(
+                          color: Colors.red.shade400,
+                          fontSize: 14,
                         ),
-                      );
-                    },
-                    child: Text(
-                      'Show Details',
-                      style: TextStyle(
-                        color: Colors.red.shade400,
-                        fontSize: 14,
                       ),
                     ),
                   ),
