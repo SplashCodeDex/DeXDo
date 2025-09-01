@@ -111,6 +111,10 @@ class TodoRepository {
     });
   }
 
+  // TODO: This method performs filtering and sorting in-memory, which is inefficient.
+  // It should be refactored to use Isar's query builder to perform these operations
+  // at the database level. Attempts to do this were blocked by compilation issues
+  // with the query builder API in the current project setup.
   Stream<List<Todo>> watchTodos({
     SortBy sortBy = SortBy.position,
     bool? isDone,

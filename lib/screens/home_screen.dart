@@ -12,11 +12,18 @@ final sortByProvider = StateProvider<SortBy>((ref) => SortBy.position);
 final filterIsDoneProvider = StateProvider<bool?>((ref) => null);
 final searchQueryProvider = StateProvider<String>((ref) => '');
 
-class HomePage extends ConsumerWidget {
+class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends ConsumerState<HomePage> {
+  final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
+
+  @override
+  Widget build(BuildContext context) {
     final sortBy = ref.watch(sortByProvider);
     final filterIsDone = ref.watch(filterIsDoneProvider);
     final searchQuery = ref.watch(searchQueryProvider);
@@ -48,7 +55,12 @@ class HomePage extends ConsumerWidget {
           ),
           IconButton(
             icon: const Icon(Icons.delete_sweep_outlined),
-            onPressed: () => _showClearCompletedDialog(context, ref, todoRepositoryAsyncValue.value!),
+            onPressed: () {
+              final todoRepository = todoRepositoryAsyncValue.value;
+              if (todoRepository != null) {
+                _showClearCompletedDialog(context, todoRepository);
+              }
+            },
           ),
         ],
       ),
@@ -71,10 +83,9 @@ class HomePage extends ConsumerWidget {
               }
 
               final todos = snapshot.data!;
-              final GlobalKey<AnimatedListState> listKey = GlobalKey<AnimatedListState>();
-
+              // The GlobalKey is now part of the state, so it persists.
               return AnimatedList(
-                key: listKey,
+                key: _listKey,
                 initialItemCount: todos.length,
                 padding: const EdgeInsets.only(bottom: 80), // FAB space
                 itemBuilder: (context, index, animation) {
@@ -101,13 +112,18 @@ class HomePage extends ConsumerWidget {
         error: (err, stack) => _buildErrorState(context, err.toString()),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _addTask(context, ref, todoRepositoryAsyncValue.value!),
+        onPressed: () {
+          final todoRepository = todoRepositoryAsyncValue.value;
+          if (todoRepository != null) {
+            _addTask(context, todoRepository);
+          }
+        },
         child: const Icon(Icons.add),
       ),
     );
   }
 
-  Future<void> _addTask(BuildContext context, WidgetRef ref, TodoRepository todoRepository) async {
+  Future<void> _addTask(BuildContext context, TodoRepository todoRepository) async {
     final result = await Navigator.of(context).push<Map<String, dynamic>>(
       MaterialPageRoute(builder: (context) => const AddTaskScreen()),
     );
@@ -123,7 +139,7 @@ class HomePage extends ConsumerWidget {
     }
   }
 
-  void _showClearCompletedDialog(BuildContext context, WidgetRef ref, TodoRepository todoRepository) {
+  void _showClearCompletedDialog(BuildContext context, TodoRepository todoRepository) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(

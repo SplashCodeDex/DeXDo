@@ -4,6 +4,7 @@ import 'package:dexdo/repositories/todo_repository.dart';
 import 'package:dexdo/screens/edit_task_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:vibration/vibration.dart';
 
 class TodoListItem extends StatelessWidget {
   final Todo todo;
@@ -22,9 +23,16 @@ class TodoListItem extends StatelessWidget {
         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         leading: Checkbox(
           value: todo.isDone,
-          onChanged: (value) {
-            final updatedTodo = todo.copyWith(isDone: value, updatedAt: DateTime.now(), createdAt: todo.createdAt);
-            todoRepository.saveTodo(updatedTodo);
+          onChanged: (value) async {
+            if (value != null) {
+              // Provide haptic feedback
+              if (await Vibration.hasVibrator() ?? false) {
+                Vibration.vibrate(duration: 50, amplitude: 50);
+              }
+              final updatedTodo =
+                  todo.copyWith(isDone: value, updatedAt: DateTime.now());
+              todoRepository.saveTodo(updatedTodo);
+            }
           },
         ),
         title: Text(

@@ -114,7 +114,7 @@ const TodoSchema = CollectionSchema(
   getId: _todoGetId,
   getLinks: _todoGetLinks,
   attach: _todoAttach,
-  version: '3.1.0+1',
+  version: '3.1.0',
 );
 
 int _todoEstimateSize(

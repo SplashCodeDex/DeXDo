@@ -1,17 +1,29 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
+import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
+import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 import 'package:dexdo/main.dart';
 import 'package:dexdo/screens/home_screen.dart';
 
+// Mock PathProviderPlatform
+class FakePathProviderPlatform extends Fake
+    with MockPlatformInterfaceMixin
+    implements PathProviderPlatform {
+  @override
+  Future<String?> getApplicationDocumentsPath() async {
+    // Use a temporary directory for tests
+    final directory = await Directory.systemTemp.createTemp('test_app_docs');
+    return directory.path;
+  }
+}
+
 void main() {
+  // Set up the mock before any tests run
+  setUpAll(() {
+    PathProviderPlatform.instance = FakePathProviderPlatform();
+  });
+
   group('DeXDo App Tests', () {
     testWidgets('App loads and shows empty state', (WidgetTester tester) async {
       // Build our app and trigger a frame.
