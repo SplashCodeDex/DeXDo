@@ -12,6 +12,10 @@
 .swiftpm/
 migrate_working_dir/
 
+# Temporary files
+commit_message.txt
+*~
+
 # IntelliJ related
 *.iml
 *.ipr
@@ -32,6 +36,20 @@ migrate_working_dir/
 .pub-cache/
 .pub/
 /build/
+
+# Platform-specific generated files
+android/.gradle/
+android/app/build/
+ios/Podfile.lock
+ios/Pods/
+linux/flutter/generated_plugin_registrant.cc
+linux/flutter/generated_plugins.cmake
+macos/Flutter/GeneratedPluginRegistrant.swift
+macos/Flutter/Flutter-Debug.xcconfig
+macos/Flutter/Flutter-Release.xcconfig
+macos/Flutter/Flutter-*.xcconfig
+windows/flutter/generated_plugin_registrant.cc
+windows/flutter/generated_plugins.cmake
 
 # Symbolication related
 app.*.symbols

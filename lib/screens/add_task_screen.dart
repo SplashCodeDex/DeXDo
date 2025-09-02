@@ -126,7 +126,7 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
         recurrenceType: _isRecurring ? _recurrenceType ?? RecurrenceType.daily : RecurrenceType.daily,
         recurrenceEndDate: _isRecurring ? _recurrenceEndDate : null,
       );
-      await ref.read(todoRepositoryProvider).value!.saveTodo(newTodo);
+      await ref.read(todoRepositoryProvider).saveTodo(newTodo);
       // Simulate a brief delay for better UX
       await Future.delayed(const Duration(milliseconds: 200));
       if (mounted) {

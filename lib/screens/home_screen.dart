@@ -20,7 +20,7 @@ class HomePage extends ConsumerWidget {
     final sortBy = ref.watch(sortByProvider);
     final filterIsDone = ref.watch(filterIsDoneProvider);
     final searchQuery = ref.watch(searchQueryProvider);
-    final todoRepositoryAsyncValue = ref.watch(todoRepositoryProvider);
+    final todoRepository = ref.watch(todoRepositoryProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -48,60 +48,53 @@ class HomePage extends ConsumerWidget {
           ),
           IconButton(
             icon: const Icon(Icons.delete_sweep_outlined),
-            onPressed: () => _showClearCompletedDialog(context, ref, todoRepositoryAsyncValue.value!),
+            onPressed: () => _showClearCompletedDialog(context, ref, todoRepository),
           ),
         ],
       ),
-      body: todoRepositoryAsyncValue.when(
-        data: (todoRepository) {
-          final todosStream = todoRepository.watchTodos(
-            sortBy: sortBy,
-            isDone: filterIsDone,
-            searchQuery: searchQuery,
-          );
-          return StreamBuilder<List<Todo>>(
-            stream: todosStream,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              } else if (snapshot.hasError) {
-                return _buildErrorState(context, snapshot.error.toString());
-              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                return _buildEmptyState(context);
-              }
+      body: StreamBuilder<List<Todo>>(
+        stream: todoRepository.watchTodos(
+          sortBy: sortBy,
+          isDone: filterIsDone,
+          searchQuery: searchQuery,
+        ),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return _buildErrorState(context, snapshot.error.toString());
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return _buildEmptyState(context);
+          }
 
-              final todos = snapshot.data!;
-              final GlobalKey<AnimatedListState> listKey = GlobalKey<AnimatedListState>();
+          final todos = snapshot.data!;
+          final GlobalKey<AnimatedListState> listKey = GlobalKey<AnimatedListState>();
 
-              return AnimatedList(
-                key: listKey,
-                initialItemCount: todos.length,
-                padding: const EdgeInsets.only(bottom: 80), // FAB space
-                itemBuilder: (context, index, animation) {
-                  final todo = todos[index];
-                  return FadeTransition(
-                    opacity: animation,
-                    child: SlideTransition(
-                      position: Tween<Offset>(
-                        begin: const Offset(0, 0.1),
-                        end: Offset.zero,
-                      ).animate(animation),
-                      child: TodoListItem(
-                        todo: todo,
-                        todoRepository: todoRepository,
-                      ),
-                    ),
-                  );
-                },
+          return AnimatedList(
+            key: listKey,
+            initialItemCount: todos.length,
+            padding: const EdgeInsets.only(bottom: 80), // FAB space
+            itemBuilder: (context, index, animation) {
+              final todo = todos[index];
+              return FadeTransition(
+                opacity: animation,
+                child: SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(0, 0.1),
+                    end: Offset.zero,
+                  ).animate(animation),
+                  child: TodoListItem(
+                    todo: todo,
+                    todoRepository: todoRepository,
+                  ),
+                ),
               );
             },
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, stack) => _buildErrorState(context, err.toString()),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _addTask(context, ref, todoRepositoryAsyncValue.value!),
+        onPressed: () => _addTask(context, ref, todoRepository),
         child: const Icon(Icons.add),
       ),
     );
