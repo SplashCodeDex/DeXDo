@@ -1,24 +1,18 @@
-import 'package:isar/isar.dart';
-
-part 'todo_model.g.dart';
-
-@collection
 class Todo {
-  Id id = Isar.autoIncrement;
+  int? id;
   final String title;
   final String description;
   final bool isDone;
   final DateTime createdAt;
   final DateTime? updatedAt;
   final DateTime? dueDate;
-  @Index()
   final int position;
   final bool isRecurring;
-  @enumerated
   final RecurrenceType recurrenceType;
   final DateTime? recurrenceEndDate;
 
   Todo({
+    this.id,
     required this.title,
     this.description = '',
     this.isDone = false,
@@ -32,6 +26,7 @@ class Todo {
   });
 
   Todo copyWith({
+    int? id,
     String? title,
     String? description,
     bool? isDone,
@@ -44,6 +39,7 @@ class Todo {
     DateTime? recurrenceEndDate,
   }) {
     return Todo(
+      id: id ?? this.id,
       title: title ?? this.title,
       description: description ?? this.description,
       isDone: isDone ?? this.isDone,

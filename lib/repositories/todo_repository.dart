@@ -1,4 +1,4 @@
-import 'package:isar/isar.dart';
+import 'dart:async';
 import '../models/todo_model.dart';
 
 enum SortBy {
@@ -8,24 +8,35 @@ enum SortBy {
 }
 
 class TodoRepository {
-  final Isar isar;
+  // In-memory storage for web compatibility
+  final List<Todo> _todos = [];
+  final StreamController<List<Todo>> _todosController = StreamController<List<Todo>>();
 
-  TodoRepository(this.isar);
+  TodoRepository();
 
   Future<List<Todo>> loadTodos() async {
-    return await isar.todos.where().sortByPosition().findAll();
+    // Sort todos by position for in-memory storage
+    _todos.sort((a, b) => a.position.compareTo(b.position));
+    return _todos.toList();
   }
 
   Future<void> saveTodo(Todo todo) async {
-    await isar.writeTxn(() async {
-      // If the todo is new, assign it the next available position
-      if (todo.id == Isar.autoIncrement) {
-        final count = await isar.todos.count();
-        final todoToSave = todo.copyWith(position: count, createdAt: todo.createdAt);
-        await isar.todos.put(todoToSave);
-      } else {
-        // Otherwise, it's an update, so just save it
-        await isar.todos.put(todo);
+    // If the todo is new, assign it the next available id and position
+    if (todo.id == null || todo.id == -1) {
+      final id = _todos.length + 1; // Simple auto-increment
+      final position = todo.position < 0 ? _todos.length : todo.position;
+      final todoToSave = todo.copyWith(
+        id: id,
+        position: position,
+        createdAt: todo.createdAt ?? DateTime.now(),
+        updatedAt: DateTime.now()
+      );
+      _todos.add(todoToSave);
+    } else {
+      // Otherwise, it's an update, so find and replace it
+      final index = _todos.indexWhere((t) => t.id == todo.id);
+      if (index != -1) {
+        _todos[index] = todo.copyWith(updatedAt: DateTime.now());
 
         // If a recurring task is marked as done, create a new instance
         if (todo.isRecurring && todo.isDone && todo.recurrenceType != null) {
@@ -37,17 +48,21 @@ class TodoRepository {
           // Only create a new recurring task if the recurrence end date is not reached
           if (todo.recurrenceEndDate == null || nextDueDate.isBefore(todo.recurrenceEndDate!)) {
             final newRecurringTodo = todo.copyWith(
+              id: null, // Will get new ID
               isDone: false,
               createdAt: DateTime.now(),
               updatedAt: null,
               dueDate: nextDueDate,
-              position: await isar.todos.count(), // Assign new position
+              position: _todos.length, // Assign new position
             );
-            await isar.todos.put(newRecurringTodo);
+            await saveTodo(newRecurringTodo); // Recursively save the new task
           }
         }
       }
-    });
+    }
+
+    // Notify stream subscribers
+    _todosController.add(_todos.toList());
   }
 
   DateTime _calculateNextDueDate(DateTime currentDueDate, RecurrenceType type) {
@@ -70,58 +85,54 @@ class TodoRepository {
   }
 
   Future<void> deleteTodo(int id) async {
-    await isar.writeTxn(() async {
-      await isar.todos.delete(id);
-    });
+    _todos.removeWhere((todo) => todo.id == id);
+    _todosController.add(_todos.toList());
   }
 
   Future<void> clearAllTodos() async {
-    await isar.writeTxn(() async {
-      await isar.todos.clear();
-    });
+    _todos.clear();
+    _todosController.add(_todos.toList());
   }
 
   Future<void> updateTodoPosition(int oldIndex, int newIndex) async {
-    await isar.writeTxn(() async {
-      final todos = await isar.todos.where().sortByPosition().findAll();
+    final todos = _todos.toList();
+    todos.sort((a, b) => a.position.compareTo(b.position));
 
-      if (newIndex > oldIndex) {
-        newIndex -= 1;
+    if (oldIndex < 0 || oldIndex >= todos.length || newIndex < 0 || newIndex >= todos.length) {
+      return;
+    }
+
+    if (newIndex > oldIndex) {
+      newIndex -= 1;
+    }
+
+    final movedTodo = todos.removeAt(oldIndex);
+    todos.insert(newIndex, movedTodo);
+
+    // Update positions
+    for (int i = 0; i < todos.length; i++) {
+      if (todos[i].position != i) {
+        final oldTodo = _todos.firstWhere((t) => t.id == todos[i].id);
+        final updatedTodo = oldTodo.copyWith(position: i, updatedAt: DateTime.now());
+        _todos[_todos.indexOf(oldTodo)] = updatedTodo;
       }
+    }
 
-      final movedTodo = todos.removeAt(oldIndex);
-      todos.insert(newIndex, movedTodo);
-
-      final List<Todo> updatedTodos = [];
-      for (int i = 0; i < todos.length; i++) {
-        if (todos[i].position != i) {
-          updatedTodos.add(todos[i].copyWith(position: i, createdAt: todos[i].createdAt));
-        }
-      }
-
-      if (updatedTodos.isNotEmpty) {
-        await isar.todos.putAll(updatedTodos);
-      }
-    });
+    _todosController.add(_todos.toList());
   }
 
   Future<void> clearCompletedTodos() async {
-    await isar.writeTxn(() async {
-      await isar.todos.where().filter().isDoneEqualTo(true).deleteAll();
-    });
+    _todos.removeWhere((todo) => todo.isDone);
+    _todosController.add(_todos.toList());
   }
 
-  // TODO: This method performs filtering and sorting in-memory, which is inefficient.
-  // It should be refactored to use Isar's query builder to perform these operations
-  // at the database level. Attempts to do this were blocked by compilation issues
-  // with the query builder API in the current project setup.
   Stream<List<Todo>> watchTodos({
     SortBy sortBy = SortBy.position,
     bool? isDone,
     String? searchQuery,
   }) {
-    return isar.todos.where().watch(fireImmediately: true).map((todos) {
-      List<Todo> filteredTodos = todos;
+    return _todosController.stream.map((todos) {
+      List<Todo> filteredTodos = todos.toList();
 
       if (isDone != null) {
         filteredTodos = filteredTodos.where((todo) => todo.isDone == isDone).toList();
@@ -158,5 +169,10 @@ class TodoRepository {
 
       return filteredTodos;
     });
+  }
+
+  // Clean up resources
+  void dispose() {
+    _todosController.close();
   }
 }

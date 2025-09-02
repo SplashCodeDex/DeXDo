@@ -12,22 +12,15 @@ final sortByProvider = StateProvider<SortBy>((ref) => SortBy.position);
 final filterIsDoneProvider = StateProvider<bool?>((ref) => null);
 final searchQueryProvider = StateProvider<String>((ref) => '');
 
-class HomePage extends ConsumerStatefulWidget {
+class HomePage extends ConsumerWidget {
   const HomePage({super.key});
 
   @override
-  ConsumerState<HomePage> createState() => _HomePageState();
-}
-
-class _HomePageState extends ConsumerState<HomePage> {
-  final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final sortBy = ref.watch(sortByProvider);
     final filterIsDone = ref.watch(filterIsDoneProvider);
     final searchQuery = ref.watch(searchQueryProvider);
-    final todoRepositoryAsyncValue = ref.watch(todoRepositoryProvider);
+    final todoRepository = ref.watch(todoRepositoryProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -55,75 +48,59 @@ class _HomePageState extends ConsumerState<HomePage> {
           ),
           IconButton(
             icon: const Icon(Icons.delete_sweep_outlined),
-            onPressed: () {
-              final todoRepository = todoRepositoryAsyncValue.value;
-              if (todoRepository != null) {
-                _showClearCompletedDialog(context, todoRepository);
-              }
-            },
+            onPressed: () => _showClearCompletedDialog(context, ref, todoRepository),
           ),
         ],
       ),
-      body: todoRepositoryAsyncValue.when(
-        data: (todoRepository) {
-          final todosStream = todoRepository.watchTodos(
-            sortBy: sortBy,
-            isDone: filterIsDone,
-            searchQuery: searchQuery,
-          );
-          return StreamBuilder<List<Todo>>(
-            stream: todosStream,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              } else if (snapshot.hasError) {
-                return _buildErrorState(context, snapshot.error.toString());
-              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                return _buildEmptyState(context);
-              }
+      body: StreamBuilder<List<Todo>>(
+        stream: todoRepository.watchTodos(
+          sortBy: sortBy,
+          isDone: filterIsDone,
+          searchQuery: searchQuery,
+        ),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return _buildErrorState(context, snapshot.error.toString());
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return _buildEmptyState(context);
+          }
 
-              final todos = snapshot.data!;
-              // The GlobalKey is now part of the state, so it persists.
-              return AnimatedList(
-                key: _listKey,
-                initialItemCount: todos.length,
-                padding: const EdgeInsets.only(bottom: 80), // FAB space
-                itemBuilder: (context, index, animation) {
-                  final todo = todos[index];
-                  return FadeTransition(
-                    opacity: animation,
-                    child: SlideTransition(
-                      position: Tween<Offset>(
-                        begin: const Offset(0, 0.1),
-                        end: Offset.zero,
-                      ).animate(animation),
-                      child: TodoListItem(
-                        todo: todo,
-                        todoRepository: todoRepository,
-                      ),
-                    ),
-                  );
-                },
+          final todos = snapshot.data!;
+          final GlobalKey<AnimatedListState> listKey = GlobalKey<AnimatedListState>();
+
+          return AnimatedList(
+            key: listKey,
+            initialItemCount: todos.length,
+            padding: const EdgeInsets.only(bottom: 80), // FAB space
+            itemBuilder: (context, index, animation) {
+              final todo = todos[index];
+              return FadeTransition(
+                opacity: animation,
+                child: SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(0, 0.1),
+                    end: Offset.zero,
+                  ).animate(animation),
+                  child: TodoListItem(
+                    todo: todo,
+                    todoRepository: todoRepository,
+                  ),
+                ),
               );
             },
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, stack) => _buildErrorState(context, err.toString()),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          final todoRepository = todoRepositoryAsyncValue.value;
-          if (todoRepository != null) {
-            _addTask(context, todoRepository);
-          }
-        },
+        onPressed: () => _addTask(context, ref, todoRepository),
         child: const Icon(Icons.add),
       ),
     );
   }
 
-  Future<void> _addTask(BuildContext context, TodoRepository todoRepository) async {
+  Future<void> _addTask(BuildContext context, WidgetRef ref, TodoRepository todoRepository) async {
     final result = await Navigator.of(context).push<Map<String, dynamic>>(
       MaterialPageRoute(builder: (context) => const AddTaskScreen()),
     );
@@ -139,7 +116,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     }
   }
 
-  void _showClearCompletedDialog(BuildContext context, TodoRepository todoRepository) {
+  void _showClearCompletedDialog(BuildContext context, WidgetRef ref, TodoRepository todoRepository) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(

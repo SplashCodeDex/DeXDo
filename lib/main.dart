@@ -1,5 +1,4 @@
 
-import 'package:dexdo/models/todo_model.dart';
 import 'package:dexdo/repositories/todo_repository.dart';
 import 'package:dexdo/theme/theme.dart';
 import 'package:flutter/material.dart';
@@ -7,22 +6,10 @@ import 'package:flutter/services.dart';
 import 'package:dexdo/screens/home_screen.dart';
 import 'package:dexdo/widgets/error_boundary.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:isar/isar.dart';
-import 'package:path_provider/path_provider.dart';
 
-// Provider for the Isar instance
-final isarProvider = FutureProvider<Isar>((ref) async {
-  final dir = await getApplicationDocumentsDirectory();
-  return await Isar.open(
-    [TodoSchema],
-    directory: dir.path,
-  );
-});
-
-// Provider for the TodoRepository
-final todoRepositoryProvider = FutureProvider<TodoRepository>((ref) async {
-  final isar = await ref.watch(isarProvider.future);
-  return TodoRepository(isar);
+// Provider for the TodoRepository (in-memory for web compatibility)
+final todoRepositoryProvider = Provider<TodoRepository>((ref) {
+  return TodoRepository();
 });
 
 
